@@ -83,6 +83,7 @@ public final class GameServer implements AutoCloseable {
         kryo.register(AnonymousPlayedCardsBroadcast.class);
         kryo.register(SetAllPassedBroadcast.class);
         kryo.register(CallBullshitBroadcast.class);
+        kryo.register(SetWinnerBroadcast.class);
     }
 
     private final Server server;
@@ -651,6 +652,8 @@ public final class GameServer implements AutoCloseable {
                 this.setGameState(GameState.CONCLUDED);
 
                 GameServer.this.winner = winner;
+
+                GameServer.this.server.sendToAllTCP(new SetWinnerBroadcast(winner.connectionID));
             }
         });
     }

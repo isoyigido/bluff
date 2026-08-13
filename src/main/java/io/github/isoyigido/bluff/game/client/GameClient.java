@@ -195,6 +195,14 @@ public final class GameClient implements AutoCloseable {
                         this.handleCallBullshit(accuserID, accusedID, playedCards, bluff);
                     }
 
+                    case SetWinnerBroadcast setWinnerBroadcast -> {
+                        int playerID = setWinnerBroadcast.getPlayerID();
+
+                        GameClient.logger.info("Client received set winner broadcast. id={} name={} winnerID={}", GameClient.this.thisPlayer.connectionID, GameClient.this.thisPlayer.name, playerID);
+
+                        this.handleSetWinner(playerID);
+                    }
+
                     default -> GameClient.logger.warn("Client received invalid broadcast. id={} name={}", GameClient.this.thisPlayer.connectionID, GameClient.this.thisPlayer.name);
                 }
             }
@@ -316,6 +324,16 @@ public final class GameClient implements AutoCloseable {
                 if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.calledBullshit(accuser, accused, playedCards, bluff);
             }
 
+            private void handleSetWinner(int playerID) {
+                Player winner = this.getPlayer(playerID);
+
+                if (winner == null) return;
+
+                GameClient.this.winner = winner;
+
+                if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.setWinner();
+            }
+
             private Player getPlayer(int playerID) {
                 Player player = (playerID == GameClient.this.thisPlayer.connectionID) ? GameClient.this.thisPlayer : GameClient.this.otherPlayers.get(playerID);
 
@@ -420,5 +438,9 @@ public final class GameClient implements AutoCloseable {
 
     public int getLastPlayedCardNumber() {
         return this.lastPlayedCardNumber;
+    }
+
+    public Player getWinner() {
+        return this.winner;
     }
 }

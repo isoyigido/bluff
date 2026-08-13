@@ -6,6 +6,9 @@
     "queen": "Queen",
     "king": "King"
   },
+  "game": {
+    "win_message": "%s won the game!"
+  },
   "menu_names": {
     "main_menu": "Main Menu",
     "play_menu": "Play",

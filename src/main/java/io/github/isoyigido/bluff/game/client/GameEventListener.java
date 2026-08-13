@@ -22,4 +22,6 @@ public class GameEventListener {
     public void calledBullshit(GameClient.Player accuser, GameClient.Player accused, List<Card> cards, boolean bluff) {}
 
     public void setAllPassed() {}
+
+    public void setWinner() {}
 }

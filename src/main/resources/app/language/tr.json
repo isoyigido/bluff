@@ -6,6 +6,9 @@
     "queen": "Kız",
     "king": "Papaz"
   },
+  "game": {
+    "win_message": "%s oyunu kazandı!"
+  },
   "menu_names": {
     "main_menu": "Ana Menü",
     "play_menu": "Oyna",
