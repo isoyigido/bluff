@@ -1,0 +1,51 @@
+{
+  "title": "Bullshit!",
+  "cards": {
+    "ace": "Ace",
+    "jack": "Jack",
+    "queen": "Queen",
+    "king": "King"
+  },
+  "menu_names": {
+    "main_menu": "Main Menu",
+    "play_menu": "Play",
+    "settings_menu": "Settings",
+    "language_menu": "Languages"
+  },
+  "menu": {
+    "buttons": {
+      "back": "Back"
+    }
+  },
+  "main_menu": {
+    "buttons": {
+      "play": "Play",
+      "settings": "Settings"
+    }
+  },
+  "play_menu": {
+    "buttons": {
+      "host": "Host Game",
+      "join": "Join Lobby"
+    }
+  },
+  "settings_menu": {
+    "buttons": {
+      "languages": "Languages"
+    }
+  },
+  "game_lobby": {
+    "buttons": {
+      "start_game": "Start Game",
+      "disconnect": "Disconnect"
+    }
+  },
+  "game_gui": {
+    "buttons": {
+      "play_cards": "Play Cards",
+      "change_rank": "Change Rank",
+      "call_bullshit": "Bullshit!",
+      "pass": "Pass"
+    }
+  }
+}

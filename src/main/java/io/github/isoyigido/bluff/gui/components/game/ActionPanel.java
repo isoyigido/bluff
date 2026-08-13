@@ -1,0 +1,190 @@
+package io.github.isoyigido.bluff.gui.components.game;
+
+import io.github.isoyigido.basic.gui.app.Translator;
+import io.github.isoyigido.basic.gui.core.Component;
+import io.github.isoyigido.basic.gui.core.Widget;
+import io.github.isoyigido.bluff.game.cards.Card;
+import io.github.isoyigido.bluff.game.cards.Rank;
+import io.github.isoyigido.bluff.game.client.GameClient;
+import io.github.isoyigido.bluff.gui.components.Button;
+import io.github.isoyigido.bluff.gui.components.HorizontalContainer;
+import io.github.isoyigido.bluff.gui.components.VerticalContainer;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ActionPanel extends Component {
+    private final GameClient gameClient;
+
+    private final Button bullshitButton;
+    private final Button playButton;
+    private final Button rankButton;
+    private final Button passButton;
+
+    private final Widget panelWidget;
+
+    private final RankSelectionComponent rankSelectionComponent;
+
+    private List<Card> selectedCards = new ArrayList<>(0);
+
+    public ActionPanel(GameClient gameClient, int buttonWidth, int buttonHeight, int buttonArc, int gap) {
+        this.gameClient = gameClient;
+
+        this.bullshitButton = new Button(
+                buttonWidth, buttonHeight,
+                buttonArc,
+                true,
+                Translator.get("game_gui.buttons.call_bullshit"),
+                null,
+                this::callBullshit
+        ).setBaseColor(
+                new Color(133, 0, 0),
+                new Color(155, 22, 22),
+                new Color(82, 82, 82)
+        ).setTextColor(
+                Color.WHITE,
+                Color.WHITE
+        );
+
+        this.playButton = new Button(
+                buttonWidth, buttonHeight,
+                buttonArc,
+                true,
+                Translator.get("game_gui.buttons.play_cards"),
+                null,
+                this::playCards
+        ).setBaseColor(
+                new Color(36, 180, 12),
+                new Color(60, 204, 36),
+                new Color(153, 153, 153)
+        ).setTextColor(
+                Color.WHITE,
+                Color.WHITE
+        );
+
+        this.rankButton = new Button(
+                buttonWidth, buttonHeight,
+                buttonArc,
+                true,
+                Translator.get("game_gui.buttons.change_rank"),
+                null,
+                this::changeRank
+        ).setBaseColor(
+                new Color(0, 38, 156),
+                new Color(22, 60, 178),
+                new Color(105, 105, 105)
+        ).setTextColor(
+                Color.WHITE,
+                Color.WHITE
+        );
+
+        this.passButton = new Button(
+                buttonWidth, buttonHeight,
+                buttonArc,
+                true,
+                Translator.get("game_gui.buttons.pass"),
+                null,
+                this::pass
+        );
+
+        VerticalContainer buttonContainer = new VerticalContainer(
+                gap,
+                false,
+                new HorizontalContainer(
+                        gap,
+                        false,
+                        this.bullshitButton,
+                        this.playButton
+                ),
+                new HorizontalContainer(
+                        gap,
+                        false,
+                        this.rankButton,
+                        this.passButton
+                )
+        );
+
+        this.panelWidget = buttonContainer.topLeft(0, 0);
+
+        this.updateButtons();
+
+        super.addWidget(this.panelWidget);
+
+        super.setDimensions(buttonContainer.getWidth(), buttonContainer.getHeight());
+
+        this.rankSelectionComponent = new RankSelectionComponent(
+                160, 80,
+                80,
+                this::changeRank
+        );
+
+        this.rankSelectionComponent.deactivate();
+
+        super.addWidget(this.rankSelectionComponent.center(super.getWidth() / 2, super.getHeight() / 2).hide());
+    }
+
+    public void updateButtons() {
+        if (!this.gameClient.isThisPlayerInTurn()) {
+            this.bullshitButton.deactivate();
+            this.playButton.deactivate();
+            this.rankButton.deactivate();
+            this.passButton.deactivate();
+
+            this.panelWidget.hide();
+
+            return;
+        }
+
+        this.panelWidget.show();
+
+        this.playButton.setActive(!this.selectedCards.isEmpty());
+
+        GameClient.Player lastPlayer = this.gameClient.getLastPlayer();
+        boolean isThisPlayerTheLastPlayer = this.gameClient.isThisPlayerTheLastPlayer();
+        boolean allPassed = this.gameClient.didAllPass();
+
+        this.passButton.setActive((lastPlayer != null) && !allPassed);
+        this.bullshitButton.setActive((lastPlayer != null) && !isThisPlayerTheLastPlayer);
+
+        this.rankButton.setActive(!this.selectedCards.isEmpty() && allPassed);
+    }
+
+    public void setSelectedCards(List<Card> selectedCards) {
+        this.selectedCards = selectedCards;
+        this.updateButtons();
+    }
+
+    private void playCards() {
+        this.gameClient.playCards(this.selectedCards);
+    }
+
+    private void changeRank() {
+        this.bullshitButton.deactivate();
+        this.playButton.deactivate();
+        this.rankButton.deactivate();
+        this.passButton.deactivate();
+
+        this.panelWidget.hide();
+
+        this.rankSelectionComponent.activate();
+        this.rankSelectionComponent.getWidget().show();
+    }
+
+    private void changeRank(Rank rank) {
+        this.rankSelectionComponent.deactivate();
+        this.rankSelectionComponent.getWidget().hide();
+
+        this.updateButtons();
+
+        this.gameClient.changeRank(rank, this.selectedCards);
+    }
+
+    private void callBullshit() {
+        this.gameClient.callBullshit();
+    }
+
+    private void pass() {
+        this.gameClient.pass();
+    }
+}

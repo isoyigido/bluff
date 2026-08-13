@@ -1,0 +1,51 @@
+{
+  "title": "Blöf!",
+  "cards": {
+    "ace": "As",
+    "jack": "Vale",
+    "queen": "Kız",
+    "king": "Papaz"
+  },
+  "menu_names": {
+    "main_menu": "Ana Menü",
+    "play_menu": "Oyna",
+    "settings_menu": "Ayarlar",
+    "language_menu": "Dil Seçimi"
+  },
+  "menu": {
+    "buttons": {
+      "back": "Geri"
+    }
+  },
+  "main_menu": {
+    "buttons": {
+      "play": "Oyna",
+      "settings": "Ayarlar"
+    }
+  },
+  "play_menu": {
+    "buttons": {
+      "host": "Oyun Kur",
+      "join": "Katıl"
+    }
+  },
+  "settings_menu": {
+    "buttons": {
+      "languages": "Dil Seçimi"
+    }
+  },
+  "game_lobby": {
+    "buttons": {
+      "start_game": "Oyunu Başlat",
+      "disconnect": "Ayrıl"
+    }
+  },
+  "game_gui": {
+    "buttons": {
+      "play_cards": "Kartları Oyna",
+      "change_rank": "Sayı Değiştir",
+      "call_bullshit": "Blöf!",
+      "pass": "Pas"
+    }
+  }
+}

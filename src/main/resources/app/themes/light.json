@@ -1,0 +1,22 @@
+{
+  "background": "(34, 104, 161)",
+  "text": "(255, 255, 255)",
+  "placeholder-text": "(200, 200, 200)",
+  "navigation-text": "(220, 220, 220)",
+  "button": {
+    "background": "(200, 200, 200)",
+    "background-hovered": "(220, 220, 220)",
+    "base": "(255, 255, 255)",
+    "base-hovered": "(240, 240, 240)",
+    "base-inactive": "(64, 64, 64)",
+    "text": "(0, 0, 0)",
+    "text-inactive": "(128, 128, 128)"
+  },
+  "text-input": {
+    "background": "(255, 255, 255)",
+    "border": "(0, 0, 0)",
+    "border-focused": "(32, 32, 32)",
+    "text": "(0, 0, 0)",
+    "placeholder-text": "(128, 128, 128)"
+  }
+}
