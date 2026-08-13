@@ -29,7 +29,7 @@ jobs:
       - name: Prepare bluff.jar
         run: |
           # Find the generated jar in target/ and copy/rename it to bluff.jar
-          JAR_FILE=$(find target -name "*.jar" ! -name "*sources*" ! -name "*javadoc*" | head -n 1)
+          JAR_FILE=$(find target -name "*-jar-with-dependencies.jar" | head -n 1)
           cp "$JAR_FILE" target/bluff.jar
 
       - name: Run Semantic Release
