@@ -6,6 +6,7 @@ import io.github.isoyigido.basic.gui.core.Widget;
 import io.github.isoyigido.bluff.game.cards.Card;
 import io.github.isoyigido.bluff.game.cards.Rank;
 import io.github.isoyigido.bluff.game.client.GameClient;
+import io.github.isoyigido.bluff.game.server.GameServer;
 import io.github.isoyigido.bluff.gui.components.Button;
 import io.github.isoyigido.bluff.gui.components.HorizontalContainer;
 import io.github.isoyigido.bluff.gui.components.VerticalContainer;
@@ -24,7 +25,9 @@ public class ActionPanel extends Component {
 
     private final Widget panelWidget;
 
-    private final RankSelectionComponent rankSelectionComponent;
+    private final Widget rankSelectionWidget;
+
+    private boolean selectingRank = false;
 
     private List<Card> selectedCards = new ArrayList<>(0);
 
@@ -113,24 +116,19 @@ public class ActionPanel extends Component {
 
         super.setDimensions(buttonContainer.getWidth(), buttonContainer.getHeight());
 
-        this.rankSelectionComponent = new RankSelectionComponent(
+        this.rankSelectionWidget = new RankSelectionComponent(
                 160, 80,
                 80,
                 this::changeRank
-        );
+        ).center(super.getWidth() / 2, super.getHeight() / 2).hide();
 
-        this.rankSelectionComponent.deactivate();
-
-        super.addWidget(this.rankSelectionComponent.center(super.getWidth() / 2, super.getHeight() / 2).hide());
+        super.addWidget(this.rankSelectionWidget);
     }
 
     public void updateButtons() {
-        if (!this.gameClient.isThisPlayerInTurn()) {
-            this.bullshitButton.deactivate();
-            this.playButton.deactivate();
-            this.rankButton.deactivate();
-            this.passButton.deactivate();
+        if (this.selectingRank) return;
 
+        if (!this.gameClient.isThisPlayerInTurn() || (this.gameClient.getGameState() != GameServer.GameState.PLAYING)) {
             this.panelWidget.hide();
 
             return;
@@ -160,20 +158,17 @@ public class ActionPanel extends Component {
     }
 
     private void changeRank() {
-        this.bullshitButton.deactivate();
-        this.playButton.deactivate();
-        this.rankButton.deactivate();
-        this.passButton.deactivate();
+        this.selectingRank = true;
 
         this.panelWidget.hide();
 
-        this.rankSelectionComponent.activate();
-        this.rankSelectionComponent.getWidget().show();
+        this.rankSelectionWidget.show();
     }
 
     private void changeRank(Rank rank) {
-        this.rankSelectionComponent.deactivate();
-        this.rankSelectionComponent.getWidget().hide();
+        this.rankSelectionWidget.hide();
+
+        this.selectingRank = false;
 
         this.updateButtons();
 

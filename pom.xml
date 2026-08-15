@@ -51,7 +51,8 @@
         <dependency>
             <groupId>com.github.isoyigido</groupId>
             <artifactId>basic-gui</artifactId>
-            <version>0.7.0</version>
+            <version>0.8.0</version>
+            <scope>compile</scope>
         </dependency>
 
         <!-- Source: https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
