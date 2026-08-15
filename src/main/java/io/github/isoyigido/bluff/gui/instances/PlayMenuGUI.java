@@ -32,7 +32,7 @@ public class PlayMenuGUI extends GUI {
                         true,
                         Translator.get("play_menu.buttons.host"),
                         null,
-                        () -> GameServer.get(4).ifPresent(_ -> GUIManager.setGUI(new GUI()))
+                        () -> GameServer.host(4).ifPresent(_ -> GUIManager.setGUI(new GUI()))
                 ),
                 new Button(
                         MainMenuGUI.BUTTON_WIDTH, MainMenuGUI.BUTTON_HEIGHT,
