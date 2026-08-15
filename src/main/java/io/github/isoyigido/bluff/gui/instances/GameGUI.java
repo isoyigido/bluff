@@ -78,6 +78,10 @@ public class GameGUI extends GUI {
 
             @Override
             public void setWinner() {
+                playerCardsOverlay.updatePlayerCards();
+                middleCardsComponent.updateCards();
+                actionPanel.updateButtons();
+
                 this.concludeGame();
             }
 
