@@ -16,6 +16,9 @@ import io.github.isoyigido.bluff.gui.components.VerticalContainer;
 import java.util.Set;
 
 public class PlayMenuGUI extends GUI {
+    private static String savedAddress = null;
+    private static String savedName = null;
+
     private final TextInput addressInput;
     private final TextInput nameInput;
 
@@ -67,6 +70,9 @@ public class PlayMenuGUI extends GUI {
                 .setOnEnterPressed(this::enterName);
         this.nameInput = new TextInput(512, 96, 32, Theme.getFont(36), "", "Player Name", 32, Set.of('a', 'b', 'c', 'ç', 'd', 'e', 'f', 'g', 'ğ', 'h', 'ı', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'ö', 'p', 'q', 'r', 's', 'ş', 't', 'u', 'ü', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'Ç', 'D', 'E', 'F', 'G', 'Ğ', 'H', 'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'Q', 'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '_', '-', '.', ' '));
 
+        if (PlayMenuGUI.savedAddress != null) this.addressInput.setText(PlayMenuGUI.savedAddress);
+        if (PlayMenuGUI.savedName != null) this.nameInput.setText(PlayMenuGUI.savedName);
+
         super.addWidget(this.addressInput.center().hide());
         super.addWidget(this.nameInput.center().hide());
     }
@@ -85,6 +91,9 @@ public class PlayMenuGUI extends GUI {
             this.nameInput.getWidget().hide();
             super.enableInput();
         }));
+
+        PlayMenuGUI.savedAddress = this.addressInput.getText();
+        PlayMenuGUI.savedName = this.nameInput.getText();
 
         this.nameInput.getWidget().show();
 
