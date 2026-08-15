@@ -10,6 +10,7 @@ import io.github.isoyigido.bluff.gui.components.Button;
 import io.github.isoyigido.bluff.gui.components.VerticalContainer;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
 public class MainMenuGUI extends GUI {
     public static final int BUTTON_WIDTH = 480;
@@ -19,12 +20,22 @@ public class MainMenuGUI extends GUI {
 
     public static final int BACK_BUTTON_MARGIN = 20;
 
+    private static boolean textChanged = false;
+
     public MainMenuGUI() {
         super.addWidget(new TextComponent(
-                Translator.get("title"),
+                MainMenuGUI.textChanged ? "Tezgâh" : Translator.get("title"),
                 Color.WHITE,
                 Theme.getFont(64, true, false)
-        ).top(ScreenConfig.xCenter, 240));
+        ){
+            @Override
+            public void keyTypingEvent(KeyEvent e) {
+                if (e.getKeyChar() == 't') {
+                    MainMenuGUI.textChanged = true;
+                    this.setText("Tezgâh");
+                }
+            }
+        }.top(ScreenConfig.xCenter, 240));
 
         super.addWidget(new VerticalContainer(
                 MainMenuGUI.BUTTON_GAP,
