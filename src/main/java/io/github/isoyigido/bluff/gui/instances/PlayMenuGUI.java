@@ -32,7 +32,7 @@ public class PlayMenuGUI extends GUI {
                         true,
                         Translator.get("play_menu.buttons.host"),
                         null,
-                        () -> GameServer.host(4).ifPresent(_ -> GUIManager.setGUI(new GUI()))
+                        this::hostGame
                 ),
                 new Button(
                         MainMenuGUI.BUTTON_WIDTH, MainMenuGUI.BUTTON_HEIGHT,
@@ -90,10 +90,26 @@ public class PlayMenuGUI extends GUI {
             GameClient.get(this.addressInput.getText(), this.nameInput.getText()).map(GameLobbyGUI::new).ifPresent(GUIManager::setGUI);
             this.nameInput.getWidget().hide();
             super.enableInput();
+
+            PlayMenuGUI.savedAddress = this.addressInput.getText();
+            PlayMenuGUI.savedName = this.nameInput.getText();
         }));
 
-        PlayMenuGUI.savedAddress = this.addressInput.getText();
-        PlayMenuGUI.savedName = this.nameInput.getText();
+        this.nameInput.getWidget().show();
+
+        super.disableInput(this.nameInput.getWidget());
+    }
+
+    private void hostGame() {
+        GameServer.host(4);
+
+        this.nameInput.setOnEnterPressed(() -> GUIUtils.doWithLoadingScreen(() -> {
+            GameClient.get("localhost", this.nameInput.getText()).map(GameLobbyGUI::new).ifPresent(GUIManager::setGUI);
+            this.nameInput.getWidget().hide();
+            super.enableInput();
+
+            PlayMenuGUI.savedName = this.nameInput.getText();
+        }));
 
         this.nameInput.getWidget().show();
 
