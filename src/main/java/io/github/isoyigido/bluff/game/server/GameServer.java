@@ -39,7 +39,7 @@ public final class GameServer implements AutoCloseable {
         CONCLUDED
     }
 
-    public static Optional<GameServer> get(int maximumNumberOfPlayers) {
+    public static Optional<GameServer> host(int maximumNumberOfPlayers) {
         Server server = new Server();
 
         Kryo kryo = server.getKryo();
