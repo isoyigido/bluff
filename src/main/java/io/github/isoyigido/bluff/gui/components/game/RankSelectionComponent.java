@@ -46,7 +46,7 @@ public class RankSelectionComponent extends Button {
     public void mouseWheelEvent(MouseWheelEvent e) {
         if (!super.isActive()) return;
 
-        this.selectedIndex = Math.clamp(this.selectedIndex + e.getWheelRotation(), 0, this.ranks.length - 1);
+        this.selectedIndex = Math.clamp(this.selectedIndex - e.getWheelRotation(), 0, this.ranks.length - 1);
 
         super.setLabel(this.ranks[this.selectedIndex]);
     }
