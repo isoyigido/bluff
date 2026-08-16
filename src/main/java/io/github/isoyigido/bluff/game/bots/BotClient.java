@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.random.RandomGenerator;
 
 public final class BotClient {
     private static final String[] BOT_NAMES = new String[] {
@@ -29,9 +31,11 @@ public final class BotClient {
         GameClient.get("localhost", "[BOT] " + BOT_NAMES[BotClient.random.nextInt(0, BOT_NAMES.length)]).map(BotClient::new);
     }
 
-    private static final Random random = new Random();
+    private static final RandomGenerator random = new Random();
 
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+
+    private ScheduledFuture<?> scheduledFuture = null;
 
     private final GameClient gameClient;
 
@@ -45,10 +49,14 @@ public final class BotClient {
         gameClient.setGameEventListener(new GameEventListener(){
             @Override
             public void setTurn() {
-                if (!gameClient.isThisPlayerInTurn() || BotClient.this.inDelay) return;
+                if (!gameClient.isThisPlayerInTurn()) {
+                    if (BotClient.this.scheduledFuture != null) BotClient.this.scheduledFuture.cancel(false);
+                    BotClient.this.inDelay = false;
+                    return;
+                }
 
                 BotClient.this.inDelay = true;
-                BotClient.scheduler.schedule(BotClient.this::play, BotClient.getDelay(), TimeUnit.MILLISECONDS);
+                BotClient.this.scheduledFuture = BotClient.scheduler.schedule(BotClient.this::play, BotClient.getDelay(), TimeUnit.MILLISECONDS);
             }
 
             @Override
@@ -68,7 +76,7 @@ public final class BotClient {
         if (!gameClient.isThisPlayerInTurn() || this.inDelay) return;
 
         this.inDelay = true;
-        BotClient.scheduler.schedule(this::play, BotClient.getDelay(), TimeUnit.MILLISECONDS);
+        this.scheduledFuture = BotClient.scheduler.schedule(this::play, BotClient.getDelay(), TimeUnit.MILLISECONDS);
     }
 
     private void play() {
@@ -79,7 +87,7 @@ public final class BotClient {
         if (!this.gameClient.isThisPlayerInTurn()) return;
 
         this.inDelay = true;
-        BotClient.scheduler.schedule(this::play, BotClient.getDelay(), TimeUnit.MILLISECONDS);
+        this.scheduledFuture = BotClient.scheduler.schedule(this::play, BotClient.getDelay(), TimeUnit.MILLISECONDS);
     }
 
     private void makeMove() {
