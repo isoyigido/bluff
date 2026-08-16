@@ -2,11 +2,26 @@
   "title": "Blöf!",
   "cards": {
     "ace": "As",
+    "two": "İki",
+    "three": "Üç",
+    "four": "Dört",
+    "five": "Beş",
+    "six": "Altı",
+    "seven": "Yedi",
+    "eight": "Sekiz",
+    "nine": "Dokuz",
+    "ten": "On",
     "jack": "Vale",
     "queen": "Kız",
     "king": "Papaz"
   },
   "game": {
+    "waiting_text": "%s bekleniyor.",
+    "played_cards": "%s %s adet %s fırlattı.",
+    "called_bullshit": {
+      "right": "%s, %s oyuncusunun blöfünü yakaladı!",
+      "wrong": "%s, %s oyuncusunu haksız yere suçladı!"
+    },
     "win_message": "%s oyunu kazandı!"
   },
   "menu_names": {

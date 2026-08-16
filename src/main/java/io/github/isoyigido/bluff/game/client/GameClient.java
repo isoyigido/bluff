@@ -295,7 +295,7 @@ public final class GameClient implements AutoCloseable {
                 GameClient.this.lastPlayer = player;
                 GameClient.this.lastPlayedCardNumber = numberOfCards;
 
-                if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.playedCards();
+                if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.playedCards(player, currentRank, numberOfCards);
             }
 
             private void handleSetAllPassed(boolean allPassed) {
@@ -384,6 +384,10 @@ public final class GameClient implements AutoCloseable {
     }
 
     // --- GETTERS ---
+    public Client getClient() {
+        return this.client;
+    }
+
     public Player getThisPlayer() {
         return this.thisPlayer;
     }

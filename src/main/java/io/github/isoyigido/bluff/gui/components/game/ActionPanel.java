@@ -1,8 +1,10 @@
 package io.github.isoyigido.bluff.gui.components.game;
 
+import io.github.isoyigido.basic.gui.app.Theme;
 import io.github.isoyigido.basic.gui.app.Translator;
 import io.github.isoyigido.basic.gui.core.Component;
 import io.github.isoyigido.basic.gui.core.Widget;
+import io.github.isoyigido.basic.gui.core.components.TextComponent;
 import io.github.isoyigido.bluff.game.cards.Card;
 import io.github.isoyigido.bluff.game.cards.Rank;
 import io.github.isoyigido.bluff.game.client.GameClient;
@@ -30,6 +32,8 @@ public class ActionPanel extends Component {
     private boolean selectingRank = false;
 
     private List<Card> selectedCards = new ArrayList<>(0);
+
+    private final TextComponent waitingText;
 
     public ActionPanel(GameClient gameClient, int buttonWidth, int buttonHeight, int buttonArc, int gap) {
         this.gameClient = gameClient;
@@ -110,8 +114,6 @@ public class ActionPanel extends Component {
 
         this.panelWidget = buttonContainer.topLeft(0, 0);
 
-        this.updateButtons();
-
         super.addWidget(this.panelWidget);
 
         super.setDimensions(buttonContainer.getWidth(), buttonContainer.getHeight());
@@ -123,16 +125,42 @@ public class ActionPanel extends Component {
         ).center(super.getWidth() / 2, super.getHeight() / 2).hide();
 
         super.addWidget(this.rankSelectionWidget);
+
+        this.waitingText = new TextComponent(
+                "",
+                Theme.getColor("text"),
+                Theme.getFont(36, true, false)
+        );
+
+        super.addWidget(this.waitingText.center(super.getWidth() / 2, super.getHeight() / 2).hide());
+
+        this.updateElements();
     }
 
-    public void updateButtons() {
+    public void updateElements() {
         if (this.selectingRank) return;
 
         if (!this.gameClient.isThisPlayerInTurn() || (this.gameClient.getGameState() != GameServer.GameState.PLAYING)) {
             this.panelWidget.hide();
 
+            this.rankSelectionWidget.hide();
+
+            GameClient.Player playerInTurn = this.gameClient.getPlayerInTurn();
+
+            if (this.gameClient.getGameState() == GameServer.GameState.PLAYING) {
+                if (playerInTurn != null) {
+                    this.waitingText.setText(Translator.get("game.waiting_text").formatted(playerInTurn.getName()));
+
+                    this.waitingText.getWidget().show();
+                }
+            } else {
+                this.waitingText.getWidget().hide();
+            }
+
             return;
         }
+
+        this.waitingText.getWidget().hide();
 
         this.panelWidget.show();
 
@@ -150,7 +178,7 @@ public class ActionPanel extends Component {
 
     public void setSelectedCards(List<Card> selectedCards) {
         this.selectedCards = selectedCards;
-        this.updateButtons();
+        this.updateElements();
     }
 
     private void playCards() {
@@ -170,7 +198,7 @@ public class ActionPanel extends Component {
 
         this.selectingRank = false;
 
-        this.updateButtons();
+        this.updateElements();
 
         this.gameClient.changeRank(rank, this.selectedCards);
     }
