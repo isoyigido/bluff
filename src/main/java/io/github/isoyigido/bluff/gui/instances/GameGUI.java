@@ -2,11 +2,13 @@ package io.github.isoyigido.bluff.gui.instances;
 
 import io.github.isoyigido.basic.gui.app.Theme;
 import io.github.isoyigido.basic.gui.app.Translator;
+import io.github.isoyigido.basic.gui.core.Component;
 import io.github.isoyigido.basic.gui.core.GUI;
 import io.github.isoyigido.basic.gui.core.GUIManager;
 import io.github.isoyigido.basic.gui.core.components.TextComponent;
 import io.github.isoyigido.basic.gui.window.ScreenConfig;
 import io.github.isoyigido.bluff.game.cards.Card;
+import io.github.isoyigido.bluff.game.cards.Rank;
 import io.github.isoyigido.bluff.game.client.GameClient;
 import io.github.isoyigido.bluff.game.client.GameEventListener;
 import io.github.isoyigido.bluff.gui.components.game.ActionPanel;
@@ -15,20 +17,26 @@ import io.github.isoyigido.bluff.gui.components.game.PlayerCardsOverlay;
 import io.github.isoyigido.bluff.gui.components.game.PlayerNamesOverlay;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class GameGUI extends GUI {
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
     public GameGUI(GameClient gameClient) {
-        ActionPanel actionPanel = new ActionPanel(gameClient, 240, 60, 24, 20);
+        ActionPanel actionPanel = new ActionPanel(gameClient, 240, 60, 24, 16);
 
         PlayerNamesOverlay playerNamesOverlay = new PlayerNamesOverlay(gameClient, 40);
         PlayerCardsOverlay playerCardsOverlay = new PlayerCardsOverlay(gameClient, actionPanel, 80);
-        MiddleCardsComponent middleCardsComponent = new MiddleCardsComponent(gameClient);
+        MiddleCardsComponent middleCardsComponent = new MiddleCardsComponent(gameClient, 20);
 
         super.addWidget(playerNamesOverlay.center());
         super.addWidget(playerCardsOverlay.center());
         super.addWidget(middleCardsComponent.center());
-        super.addWidget(actionPanel.top(ScreenConfig.xCenter, ScreenConfig.yCenter + 100));
+        super.addWidget(actionPanel.top(ScreenConfig.xCenter, ScreenConfig.yCenter + 120));
 
         TextComponent winnerText = new TextComponent(
                 "",
@@ -44,7 +52,7 @@ public class GameGUI extends GUI {
                 playerNamesOverlay.updatePlayerNames();
                 playerCardsOverlay.updatePlayerCards();
                 middleCardsComponent.updateCards();
-                actionPanel.updateButtons();
+                actionPanel.updateElements();
             }
 
             @Override
@@ -54,33 +62,38 @@ public class GameGUI extends GUI {
 
             @Override
             public void setTurn() {
-                actionPanel.updateButtons();
+                playerNamesOverlay.updatePlayerNames();
+                actionPanel.updateElements();
             }
 
             @Override
-            public void playedCards() {
+            public void playedCards(GameClient.Player player, Rank rank, int numberOfCards) {
                 playerCardsOverlay.updatePlayerCards();
                 middleCardsComponent.updateCards();
-                actionPanel.updateButtons();
+                actionPanel.updateElements();
+
+                middleCardsComponent.playCards(player, rank, numberOfCards);
             }
 
             @Override
             public void calledBullshit(GameClient.Player accuser, GameClient.Player accused, List<Card> cards, boolean bluff) {
                 playerCardsOverlay.updatePlayerCards();
                 middleCardsComponent.updateCards();
-                actionPanel.updateButtons();
+                actionPanel.updateElements();
+
+                middleCardsComponent.callBullshit(accuser, accused, cards, bluff);
             }
 
             @Override
             public void setAllPassed() {
-                actionPanel.updateButtons();
+                actionPanel.updateElements();
             }
 
             @Override
             public void setWinner() {
                 playerCardsOverlay.updatePlayerCards();
                 middleCardsComponent.updateCards();
-                actionPanel.updateButtons();
+                actionPanel.updateElements();
 
                 this.concludeGame();
             }
@@ -90,26 +103,28 @@ public class GameGUI extends GUI {
 
                 winnerText.getWidget().show();
 
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(8000);
-                    } catch (Exception _) {}
-
+                GameGUI.scheduler.schedule(() -> {
                     GUIManager.setGUI(PlayMenuGUI::new);
-                }).start();
+                    gameClient.close();
+                }, 5, TimeUnit.SECONDS);
             }
         });
 
         playerNamesOverlay.updatePlayerNames();
         playerCardsOverlay.updatePlayerCards();
         middleCardsComponent.updateCards();
-        actionPanel.updateButtons();
+        actionPanel.updateElements();
 
-        GUIManager.setGlobalKeyBind('u', () -> {
-            playerNamesOverlay.updatePlayerNames();
-            playerCardsOverlay.updatePlayerCards();
-            middleCardsComponent.updateCards();
-            actionPanel.updateButtons();
-        });
+        super.addWidget(new Component(){
+            @Override
+            public void keyTypingEvent(KeyEvent e) {
+                if (e.getKeyChar() == 'u') {
+                    playerNamesOverlay.updatePlayerNames();
+                    playerCardsOverlay.updatePlayerCards();
+                    middleCardsComponent.updateCards();
+                    actionPanel.updateElements();
+                }
+            }
+        }.center());
     }
 }

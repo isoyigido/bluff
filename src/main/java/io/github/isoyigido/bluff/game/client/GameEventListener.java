@@ -1,6 +1,7 @@
 package io.github.isoyigido.bluff.game.client;
 
 import io.github.isoyigido.bluff.game.cards.Card;
+import io.github.isoyigido.bluff.game.cards.Rank;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class GameEventListener {
 
     public void setTurn() {}
 
-    public void playedCards() {}
+    public void playedCards(GameClient.Player player, Rank rank, int numberOfCards) {}
 
     public void calledBullshit(GameClient.Player accuser, GameClient.Player accused, List<Card> cards, boolean bluff) {}
 

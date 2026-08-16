@@ -2,11 +2,26 @@
   "title": "Bullshit!",
   "cards": {
     "ace": "Ace",
+    "two": "Two",
+    "three": "Three",
+    "four": "Four",
+    "five": "Five",
+    "six": "Six",
+    "seven": "Seven",
+    "eight": "Eight",
+    "nine": "Nine",
+    "ten": "Ten",
     "jack": "Jack",
     "queen": "Queen",
     "king": "King"
   },
   "game": {
+    "waiting_text": "Waiting for %s.",
+    "played_cards": "%s played %s x %s.",
+    "called_bullshit": {
+      "right": "%s correctly called bullshit on %s!",
+      "wrong": "%s falsely accused %s!"
+    },
     "win_message": "%s won the game!"
   },
   "menu_names": {
