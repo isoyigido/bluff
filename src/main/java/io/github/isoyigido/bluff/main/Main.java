@@ -22,9 +22,9 @@ public final class Main {
     private static final String ICON_PATH = "/game/cards/SA.png";
 
     public static void main(String[] args) {
-        Theme.registerColorTheme("/app/themes", "light");
+        Theme.registerColorTheme("/app/themes", "light", "dark");
 
-        Theme.setColorTheme("light");
+        Theme.setColorTheme("dark");
 
         Translator.register("/app/language", "en", "tr");
 

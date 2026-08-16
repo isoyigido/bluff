@@ -9,7 +9,6 @@ import io.github.isoyigido.basic.gui.window.ScreenConfig;
 import io.github.isoyigido.bluff.gui.components.Button;
 import io.github.isoyigido.bluff.gui.components.VerticalContainer;
 
-import java.awt.*;
 import java.awt.event.KeyEvent;
 
 public class MainMenuGUI extends GUI {
@@ -25,7 +24,7 @@ public class MainMenuGUI extends GUI {
     public MainMenuGUI() {
         super.addWidget(new TextComponent(
                 MainMenuGUI.textChanged ? "Tezgâh" : Translator.get("title"),
-                Color.WHITE,
+                Theme.getColor("text"),
                 Theme.getFont(64, true, false)
         ){
             @Override

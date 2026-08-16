@@ -24,11 +24,16 @@
     },
     "win_message": "%s won the game!"
   },
+  "color_themes": {
+    "dark": "Dark",
+    "light": "Light"
+  },
   "menu_names": {
     "main_menu": "Main Menu",
     "play_menu": "Play",
     "settings_menu": "Settings",
-    "language_menu": "Languages"
+    "language_menu": "Languages",
+    "color_theme_menu": "Color Themes"
   },
   "menu": {
     "buttons": {
@@ -49,6 +54,7 @@
   },
   "settings_menu": {
     "buttons": {
+      "color_themes": "Color Themes",
       "languages": "Languages"
     }
   },

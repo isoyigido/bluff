@@ -24,11 +24,16 @@
     },
     "win_message": "%s oyunu kazandı!"
   },
+  "color_themes": {
+    "dark": "Koyu",
+    "light": "Açık"
+  },
   "menu_names": {
     "main_menu": "Ana Menü",
     "play_menu": "Oyna",
     "settings_menu": "Ayarlar",
-    "language_menu": "Dil Seçimi"
+    "language_menu": "Dil Seçimi",
+    "color_theme_menu": "Renk Temaları"
   },
   "menu": {
     "buttons": {
@@ -49,6 +54,7 @@
   },
   "settings_menu": {
     "buttons": {
+      "color_themes": "Renk Temaları",
       "languages": "Dil Seçimi"
     }
   },
