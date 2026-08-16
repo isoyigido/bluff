@@ -4,12 +4,11 @@ import io.github.isoyigido.basic.gui.app.Theme;
 import io.github.isoyigido.basic.gui.app.Translator;
 import io.github.isoyigido.basic.gui.core.GUI;
 import io.github.isoyigido.basic.gui.core.GUIManager;
+import io.github.isoyigido.basic.gui.core.MouseButton;
 import io.github.isoyigido.basic.gui.core.components.TextComponent;
 import io.github.isoyigido.basic.gui.window.ScreenConfig;
 import io.github.isoyigido.bluff.gui.components.Button;
 import io.github.isoyigido.bluff.gui.components.VerticalContainer;
-
-import java.awt.event.KeyEvent;
 
 public class MainMenuGUI extends GUI {
     public static final int BUTTON_WIDTH = 480;
@@ -27,11 +26,17 @@ public class MainMenuGUI extends GUI {
                 Theme.getColor("text"),
                 Theme.getFont(64, true, false)
         ){
+            private int clicked = 0;
+
             @Override
-            public void keyTypingEvent(KeyEvent e) {
-                if (e.getKeyChar() == 't') {
-                    MainMenuGUI.textChanged = true;
+            public void mouseClickEvent(int x, int y, MouseButton mouseButton) {
+                if (!super.contains(x, y)) return;
+
+                this.clicked++;
+
+                if (this.clicked >= 5) {
                     this.setText("Tezgâh");
+                    MainMenuGUI.textChanged = true;
                 }
             }
         }.top(ScreenConfig.xCenter, 240));
