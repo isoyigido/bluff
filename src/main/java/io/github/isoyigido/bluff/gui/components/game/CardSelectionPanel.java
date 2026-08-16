@@ -7,6 +7,7 @@ import io.github.isoyigido.bluff.game.cards.Card;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class CardSelectionPanel extends Component {
@@ -38,15 +39,21 @@ public class CardSelectionPanel extends Component {
     }
 
     public void setCards(List<Card> cards) {
-        this.updateHitboxes(cards.size());
+        int numberOfCards = cards.size();
 
-        this.cards = cards;
+        this.updateHitboxes(numberOfCards);
+
+        List<Card> sortedCards = new ArrayList<>(cards);
+
+        sortedCards.sort(Comparator.comparing(card -> card.rank().ordinal()));
+
+        this.cards = sortedCards;
 
         this.resolveSelectedCards();
 
-        List<BufferedImage> cardImages = new ArrayList<>(cards.size());
+        List<BufferedImage> cardImages = new ArrayList<>(numberOfCards);
 
-        cards.stream()
+        this.cards.stream()
                 .map(card -> CardImage.of(card, PlayerCardsOverlay.CARD_WIDTH, PlayerCardsOverlay.CARD_HEIGHT))
                 .forEach(cardImages::add);
 
