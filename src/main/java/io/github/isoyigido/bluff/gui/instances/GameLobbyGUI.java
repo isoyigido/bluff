@@ -2,10 +2,12 @@ package io.github.isoyigido.bluff.gui.instances;
 
 import io.github.isoyigido.basic.gui.app.Theme;
 import io.github.isoyigido.basic.gui.app.Translator;
+import io.github.isoyigido.basic.gui.core.Component;
 import io.github.isoyigido.basic.gui.core.GUI;
 import io.github.isoyigido.basic.gui.core.GUIManager;
 import io.github.isoyigido.basic.gui.core.components.TextComponent;
 import io.github.isoyigido.basic.gui.window.ScreenConfig;
+import io.github.isoyigido.bluff.game.bots.BotClient;
 import io.github.isoyigido.bluff.game.client.GameClient;
 import io.github.isoyigido.bluff.game.client.GameEventListener;
 import io.github.isoyigido.bluff.game.server.GameServer;
@@ -14,6 +16,7 @@ import io.github.isoyigido.bluff.gui.components.HorizontalContainer;
 import io.github.isoyigido.bluff.gui.components.VerticalContainer;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,7 +123,13 @@ public class GameLobbyGUI extends GUI {
 
         this.updatePlayerList();
 
-        GUIManager.setGlobalKeyBind('u', this::updatePlayerList);
+        super.addWidget(new Component(){
+            @Override
+            public void keyTypingEvent(KeyEvent e) {
+                if (e.getKeyChar() == 'u') GameLobbyGUI.this.updatePlayerList();
+                else if ((e.getKeyChar() == 'b') && gameClient.isThisPlayerHost()) BotClient.add();
+            }
+        }.center());
     }
 
 
