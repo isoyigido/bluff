@@ -4,7 +4,6 @@ import io.github.isoyigido.bluff.game.cards.Card;
 import io.github.isoyigido.bluff.game.cards.Rank;
 import io.github.isoyigido.bluff.game.client.GameClient;
 import io.github.isoyigido.bluff.game.client.GameEventListener;
-import io.github.isoyigido.bluff.game.server.GameServer;
 
 import java.util.List;
 import java.util.Random;
@@ -52,11 +51,9 @@ public final class BotClient {
             }
 
             @Override
-            public void setGameState() {
-                if (gameClient.getGameState() == GameServer.GameState.CONCLUDED) {
-                    long delay = BotClient.random.nextInt(3000, 5000);
-                    BotClient.scheduler.schedule(gameClient::close, delay, TimeUnit.MILLISECONDS);
-                }
+            public void setWinner() {
+                long delay = BotClient.random.nextInt(3000, 5000);
+                BotClient.scheduler.schedule(gameClient::close, delay, TimeUnit.MILLISECONDS);
             }
 
             private void play() {
