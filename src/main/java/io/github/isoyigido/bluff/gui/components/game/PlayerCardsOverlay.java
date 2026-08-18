@@ -4,10 +4,12 @@ import io.github.isoyigido.basic.gui.core.Component;
 import io.github.isoyigido.basic.gui.window.ScreenConfig;
 import io.github.isoyigido.bluff.game.client.GameClient;
 import io.github.isoyigido.bluff.gui.CardImage;
+import io.github.isoyigido.bluff.utils.LoopingIterator;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class PlayerCardsOverlay extends Component {
@@ -20,20 +22,22 @@ public class PlayerCardsOverlay extends Component {
 
     private final int margin;
 
-    private final int[] otherPlayerCardNumbers;
-
-    private int numberOfOtherPlayers = 0;
+    private final int gap;
 
     private final CardSelectionPanel cardSelectionPanel;
 
-    public PlayerCardsOverlay(GameClient gameClient, ActionPanel actionPanel, int margin) {
+    private LoopingIterator<GameClient.Player> players;
+
+    private GameClient.Player thisPlayer;
+
+    public PlayerCardsOverlay(GameClient gameClient, ActionPanel actionPanel, int margin, int gap) {
         super(ScreenConfig.screenWidth, ScreenConfig.screenHeight);
 
         this.gameClient = gameClient;
 
         this.margin = margin;
 
-        this.otherPlayerCardNumbers = new int[4];
+        this.gap = gap;
 
         this.cardSelectionPanel = new CardSelectionPanel(actionPanel, 1280, 24);
 
@@ -45,78 +49,80 @@ public class PlayerCardsOverlay extends Component {
     public void updatePlayerCards() {
         this.cardSelectionPanel.setCards(this.gameClient.getThisCards());
 
-        List<GameClient.Player> otherPlayers = new ArrayList<>(this.gameClient.getOtherPlayers().sequencedValues());
+        this.thisPlayer = this.gameClient.getThisPlayer();
 
-        this.numberOfOtherPlayers = otherPlayers.size();
+        List<GameClient.Player> players = new ArrayList<>(this.gameClient.getOtherPlayers().sequencedValues());
 
-        for (int i = 0; i < this.otherPlayerCardNumbers.length; i++) {
-            this.otherPlayerCardNumbers[i] = (i < this.numberOfOtherPlayers) ? otherPlayers.get(i).getNumberOfCards() : 0;
-        }
+        players.add(this.thisPlayer);
+
+        players.sort(Comparator.comparing(GameClient.Player::getTurnIndex));
+
+        this.players = LoopingIterator.of(players);
     }
 
     @Override
     public void render(Graphics2D g) {
-        if (this.numberOfOtherPlayers == 0) return;
+        LoopingIterator<GameClient.Player> players = this.players;
 
-        int leftIndex = 0;
-        int topIndex = 1;
-        int rightIndex = 2;
+        int numberOfPlayers = players.size();
 
-        switch (this.numberOfOtherPlayers) {
-            case 1 -> {
-                topIndex = 0;
-                leftIndex = 1;
-            }
-            case 2 -> {
-                rightIndex = 1;
-                topIndex = 2;
-            }
+        if (numberOfPlayers < 2) return;
+
+        players.set(this.thisPlayer);
+
+        // --- NEXT PLAYER (TOP OR RIGHT) ---
+        if (numberOfPlayers == 2) this.renderTop(g, players.next().getNumberOfCards());
+        else this.renderRight(g, players.next().getNumberOfCards());
+
+        if (numberOfPlayers < 3) return;
+
+        // --- NEXT PLAYER (LEFT OR TOP) ---
+        if (numberOfPlayers == 3) this.renderLeft(g, players.next().getNumberOfCards());
+        else this.renderTop(g, players.next().getNumberOfCards());
+
+        if (numberOfPlayers < 4) return;
+
+        // --- NEXT PLAYER (LEFT) ---
+        this.renderLeft(g, players.next().getNumberOfCards());
+    }
+
+    private void renderRight(Graphics2D g, int numberOfCards) {
+        g.rotate(-Math.PI / 2);
+
+        int y = ScreenConfig.screenWidth - this.margin - PlayerCardsOverlay.CARD_HEIGHT;
+        int width = ((numberOfCards - 1) * this.gap) + PlayerCardsOverlay.CARD_WIDTH;
+        int x = -ScreenConfig.yCenter - (width / 2);
+
+        for (int i = 0; i < numberOfCards; i++) {
+            g.drawImage(PlayerCardsOverlay.BACK_IMAGE, x, y, null);
+            x += this.gap;
         }
 
-        int gap = 20;
+        g.rotate(Math.PI / 2);
+    }
 
-        // --- TOP (OTHER PLAYER 3) ---
-        int width = ((this.otherPlayerCardNumbers[topIndex] - 1) * gap) + PlayerCardsOverlay.CARD_WIDTH;
-
+    private void renderTop(Graphics2D g, int numberOfCards) {
+        int width = ((numberOfCards - 1) * this.gap) + PlayerCardsOverlay.CARD_WIDTH;
         int x = ScreenConfig.xCenter - (width / 2);
 
-        for (int i = 0; i < this.otherPlayerCardNumbers[topIndex]; i++) {
+        for (int i = 0; i < numberOfCards; i++) {
             g.drawImage(PlayerCardsOverlay.BACK_IMAGE, x, this.margin, null);
-
-            x += gap;
+            x += this.gap;
         }
+    }
 
-        // --- LEFT (OTHER PLAYER 1) ---
+    private void renderLeft(Graphics2D g, int numberOfCards) {
         g.rotate(Math.PI / 2);
 
         int y = -this.margin - PlayerCardsOverlay.CARD_HEIGHT;
+        int width = ((numberOfCards - 1) * this.gap) + PlayerCardsOverlay.CARD_WIDTH;
+        int x = ScreenConfig.yCenter - (width / 2);
 
-        width = ((this.otherPlayerCardNumbers[leftIndex] - 1) * gap) + PlayerCardsOverlay.CARD_WIDTH;
-
-        x = ScreenConfig.yCenter - (width / 2);
-
-        for (int i = 0; i < this.otherPlayerCardNumbers[leftIndex]; i++) {
+        for (int i = 0; i < numberOfCards; i++) {
             g.drawImage(PlayerCardsOverlay.BACK_IMAGE, x, y, null);
-
-            x += gap;
+            x += this.gap;
         }
 
-        // --- RIGHT (OTHER PLAYER 2) ---
-        g.rotate(-Math.PI);
-
-        y = ScreenConfig.screenWidth - this.margin - PlayerCardsOverlay.CARD_HEIGHT;
-
-        width = ((this.otherPlayerCardNumbers[rightIndex] - 1) * gap) + PlayerCardsOverlay.CARD_WIDTH;
-
-        x = -ScreenConfig.yCenter - (width / 2);
-
-        for (int i = 0; i < this.otherPlayerCardNumbers[rightIndex]; i++) {
-            g.drawImage(PlayerCardsOverlay.BACK_IMAGE, x, y, null);
-
-            x += gap;
-        }
-
-        // - Fix rotation -
-        g.rotate(Math.PI / 2);
+        g.rotate(-Math.PI / 2);
     }
 }

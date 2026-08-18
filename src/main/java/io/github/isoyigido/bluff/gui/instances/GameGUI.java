@@ -30,7 +30,7 @@ public class GameGUI extends GUI {
         ActionPanel actionPanel = new ActionPanel(gameClient, 240, 60, 24, 16);
 
         PlayerNamesOverlay playerNamesOverlay = new PlayerNamesOverlay(gameClient, 40);
-        PlayerCardsOverlay playerCardsOverlay = new PlayerCardsOverlay(gameClient, actionPanel, 80);
+        PlayerCardsOverlay playerCardsOverlay = new PlayerCardsOverlay(gameClient, actionPanel, 80, 20);
         MiddleCardsComponent middleCardsComponent = new MiddleCardsComponent(gameClient, 20);
 
         super.addWidget(playerNamesOverlay.center());

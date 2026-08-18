@@ -14,6 +14,8 @@ public class GameEventListener {
 
     public void setGameState() {}
 
+    public void startGame() {}
+
     public void setCards() {}
 
     public void setTurn() {}
