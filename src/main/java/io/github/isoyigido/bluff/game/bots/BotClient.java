@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.random.RandomGenerator;
 
@@ -35,33 +34,21 @@ public final class BotClient {
 
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
 
-    private ScheduledFuture<?> scheduledFuture = null;
-
-    private final GameClient gameClient;
-
-    private boolean inDelay = false;
-
-    private int numberOfMatchingCards = -1;
-
     private BotClient(GameClient gameClient) {
-        this.gameClient = gameClient;
-
         gameClient.setGameEventListener(new GameEventListener(){
+            private int numberOfMatchingCards = -1;
+
             @Override
             public void setTurn() {
-                if (!gameClient.isThisPlayerInTurn()) {
-                    if (BotClient.this.scheduledFuture != null) BotClient.this.scheduledFuture.cancel(false);
-                    BotClient.this.inDelay = false;
-                    return;
-                }
+                if (!gameClient.isThisPlayerInTurn()) return;
 
-                BotClient.this.inDelay = true;
-                BotClient.this.scheduledFuture = BotClient.scheduler.schedule(BotClient.this::play, BotClient.getDelay(), TimeUnit.MILLISECONDS);
+                long delay = BotClient.random.nextInt(3000, 5000);
+                BotClient.scheduler.schedule(this::play, delay, TimeUnit.MILLISECONDS);
             }
 
             @Override
             public void calledBullshit(GameClient.Player accuser, GameClient.Player accused, List<Card> cards, boolean bluff) {
-                BotClient.this.numberOfMatchingCards = -1;
+                this.numberOfMatchingCards = -1;
             }
 
             @Override
@@ -71,88 +58,70 @@ public final class BotClient {
                     BotClient.scheduler.schedule(gameClient::close, delay, TimeUnit.MILLISECONDS);
                 }
             }
-        });
 
-        if (!gameClient.isThisPlayerInTurn() || this.inDelay) return;
+            private void play() {
+                int lastPlayedCardNumber = gameClient.getLastPlayedCardNumber();
 
-        this.inDelay = true;
-        this.scheduledFuture = BotClient.scheduler.schedule(this::play, BotClient.getDelay(), TimeUnit.MILLISECONDS);
-    }
+                if (lastPlayedCardNumber > 4) {
+                    gameClient.callBullshit();
 
-    private void play() {
-        this.makeMove();
+                    return;
+                }
 
-        this.inDelay = false;
+                List<Card> cards = gameClient.getThisCards();
 
-        if (!this.gameClient.isThisPlayerInTurn()) return;
+                if (cards.isEmpty()) return;
 
-        this.inDelay = true;
-        this.scheduledFuture = BotClient.scheduler.schedule(this::play, BotClient.getDelay(), TimeUnit.MILLISECONDS);
-    }
+                Rank currentRank = gameClient.getCurrentRank();
 
-    private void makeMove() {
-        if (!this.gameClient.isThisPlayerInTurn()) return;
+                List<Card> matchingCards = cards.stream().filter(card -> card.rank() == currentRank).toList();
 
-        int lastPlayedCardNumber = this.gameClient.getLastPlayedCardNumber();
+                if (this.numberOfMatchingCards == -1) this.numberOfMatchingCards = matchingCards.size();
 
-        if (lastPlayedCardNumber > 4) {
-            this.gameClient.callBullshit();
+                if ((this.numberOfMatchingCards + lastPlayedCardNumber) > 4) {
+                    gameClient.callBullshit();
 
-            return;
-        }
+                    return;
+                }
 
-        List<Card> cards = this.gameClient.getThisCards();
+                if (BotClient.random.nextInt(0, 4) == 0) {
+                    gameClient.callBullshit();
 
-        if (cards.isEmpty()) return;
+                    return;
+                }
 
-        Rank currentRank = this.gameClient.getCurrentRank();
+                if (!matchingCards.isEmpty()) {
+                    if (BotClient.random.nextBoolean()) gameClient.playCards(matchingCards);
 
-        List<Card> matchingCards = cards.stream().filter(card -> card.rank() == currentRank).toList();
+                    else {
+                        List<Card> notMatchingCards = cards.stream().filter(card -> card.rank() != currentRank).toList();
 
-        if (this.numberOfMatchingCards == -1) this.numberOfMatchingCards = matchingCards.size();
+                        gameClient.playCards(notMatchingCards.subList(0, Math.min(notMatchingCards.size(), matchingCards.size())));
+                    }
 
-        if ((this.numberOfMatchingCards + lastPlayedCardNumber) > 4) {
-            this.gameClient.callBullshit();
+                    return;
+                }
 
-            return;
-        }
+                if (!gameClient.didAllPass()) {
+                    gameClient.pass();
 
-        if (BotClient.random.nextInt(0, 4) == 0) this.gameClient.callBullshit();
+                    return;
+                }
 
-        if (!matchingCards.isEmpty()) {
-            if (BotClient.random.nextBoolean()) this.gameClient.playCards(matchingCards);
+                Card firstCard = cards.getFirst();
 
-            else {
-                List<Card> notMatchingCards = cards.stream().filter(card -> card.rank() != currentRank).toList();
+                Rank firstCardRank = firstCard.rank();
 
-                this.gameClient.playCards(notMatchingCards.subList(0, Math.min(notMatchingCards.size(), matchingCards.size())));
+                matchingCards = cards.stream().filter(card -> card.rank() == firstCardRank).toList();
+
+                if (BotClient.random.nextBoolean()) gameClient.changeRank(firstCardRank, matchingCards);
+
+                else {
+                    List<Card> notMatchingCards = cards.stream().filter(card -> card.rank() != firstCardRank).toList();
+
+                    gameClient.changeRank(firstCardRank, notMatchingCards.subList(0, Math.min(notMatchingCards.size(), matchingCards.size())));
+                }
             }
-
-            return;
-        }
-
-        if (!this.gameClient.didAllPass()) {
-            this.gameClient.pass();
-
-            return;
-        }
-
-        Card firstCard = cards.getFirst();
-
-        Rank firstCardRank = firstCard.rank();
-
-        matchingCards = cards.stream().filter(card -> card.rank() == firstCardRank).toList();
-
-        if (BotClient.random.nextBoolean()) this.gameClient.changeRank(firstCardRank, matchingCards);
-
-        else {
-            List<Card> notMatchingCards = cards.stream().filter(card -> card.rank() != firstCardRank).toList();
-
-            this.gameClient.changeRank(firstCardRank, notMatchingCards.subList(0, Math.min(notMatchingCards.size(), matchingCards.size())));
-        }
-    }
-
-    private static int getDelay() {
-        return BotClient.random.nextInt(3000, 5000);
+        });
     }
 }
