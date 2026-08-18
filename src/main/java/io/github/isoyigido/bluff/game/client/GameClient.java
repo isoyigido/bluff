@@ -177,14 +177,14 @@ public final class GameClient implements AutoCloseable {
                         GameClient.logger.info("Client received played cards broadcast. id={} name={}", GameClient.this.thisPlayer.connectionID, GameClient.this.thisPlayer.name);
 
                         playedCardsBroadcast.getCurrentRank().ifPresent(rank ->
-                                this.handlePlayedCards(rank, playedCardsBroadcast.getNumberOfCards(), playedCardsBroadcast.getRemainingCards()));
+                                this.handlePlayedCards(rank, playedCardsBroadcast.getNumberOfCards(),playedCardsBroadcast.getPlayedCards(), playedCardsBroadcast.getRemainingCards()));
                     }
 
                     case AnonymousPlayedCardsBroadcast anonymousPlayedCardsBroadcast -> {
                         GameClient.logger.info("Client received anonymous played cards broadcast. id={} name={}", GameClient.this.thisPlayer.connectionID, GameClient.this.thisPlayer.name);
 
                         anonymousPlayedCardsBroadcast.getCurrentRank().ifPresent(rank ->
-                                this.handleAnonymousPlayedCards(anonymousPlayedCardsBroadcast.getPlayerID(), rank, anonymousPlayedCardsBroadcast.getNumberOfCards()));
+                                this.handleAnonymousPlayedCards(anonymousPlayedCardsBroadcast.getPlayerID(), rank, anonymousPlayedCardsBroadcast.getNumberOfCards(), null));
                     }
 
                     case SetAllPassedBroadcast setAllPassedBroadcast -> this.handleSetAllPassed(setAllPassedBroadcast.didAllPass());
@@ -283,13 +283,13 @@ public final class GameClient implements AutoCloseable {
                 if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.setTurn();
             }
 
-            private void handlePlayedCards(Rank currentRank, int numberOfCards, Collection<Card> remainingCards) {
+            private void handlePlayedCards(Rank currentRank, int numberOfCards, Collection<Card> playedCards, Collection<Card> remainingCards) {
                 GameClient.this.thisCards = new ArrayList<>(remainingCards);
 
-                this.handleAnonymousPlayedCards(GameClient.this.thisPlayer.connectionID, currentRank, numberOfCards);
+                this.handleAnonymousPlayedCards(GameClient.this.thisPlayer.connectionID, currentRank, numberOfCards, playedCards);
             }
 
-            private void handleAnonymousPlayedCards(int playerID, Rank currentRank, int numberOfCards) {
+            private void handleAnonymousPlayedCards(int playerID, Rank currentRank, int numberOfCards, Collection<Card> playedCards) {
                 Player player = this.getPlayer(playerID);
 
                 if (player == null) return;
@@ -304,7 +304,10 @@ public final class GameClient implements AutoCloseable {
                 GameClient.this.lastPlayer = player;
                 GameClient.this.lastPlayedCardNumber = numberOfCards;
 
-                if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.playedCards(player, currentRank, numberOfCards);
+                if (GameClient.this.gameEventListener != null) {
+                    if (playedCards == null) GameClient.this.gameEventListener.playedCards(player, currentRank, numberOfCards);
+                    else GameClient.this.gameEventListener.playedCards(currentRank, playedCards);
+                }
             }
 
             private void handleSetAllPassed(boolean allPassed) {

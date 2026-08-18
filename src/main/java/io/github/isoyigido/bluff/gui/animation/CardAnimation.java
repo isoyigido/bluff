@@ -6,14 +6,17 @@ import io.github.isoyigido.bluff.gui.components.game.PlayerCardsOverlay;
 import io.github.isoyigido.bluff.utils.AudioRegistry;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class CardAnimation {
-    private static final Audio CARD_SFX = AudioRegistry.get("card").orElse(null);
+    public static final Audio CARD_SFX = AudioRegistry.get("card").orElse(null);
 
-    private static final float AGGRESSIVENESS = 8.0f;
+    private static final float AGGRESSIVENESS = 5.0f;
 
     private static final float POWER_CONSTANT = (float) (Math.exp(-AGGRESSIVENESS));
     private static final float DIVISOR_CONSTANT = 1.0f - (float) (Math.exp(-AGGRESSIVENESS));
+
+    private final BufferedImage image;
 
     private final int startX;
     private final int startY;
@@ -40,7 +43,13 @@ public class CardAnimation {
     private boolean firstUpdate = true;
 
     public CardAnimation(int x1, int y1, int x2, int y2, float theta1, float theta2, float duration, boolean playAudio) {
+        this(PlayerCardsOverlay.BACK_IMAGE, x1, y1, x2, y2, theta1, theta2, duration, playAudio);
+    }
+
+    public CardAnimation(BufferedImage image, int x1, int y1, int x2, int y2, float theta1, float theta2, float duration, boolean playAudio) {
         if (duration <= 0) throw new IllegalArgumentException("Card animation duration must be positive.");
+
+        this.image = image;
 
         this.startX = x1;
         this.startY = y1;
@@ -69,8 +78,6 @@ public class CardAnimation {
 
         if (this.concluded) return;
 
-        this.updateCounter++;
-
         if (this.updateCounter >= this.updates) {
             this.concluded = true;
             return;
@@ -84,12 +91,14 @@ public class CardAnimation {
         this.y = this.startY + (this.deltaY * factor);
 
         this.theta = this.startTheta + (this.deltaTheta * factor);
+
+        this.updateCounter++;
     }
 
     public void render(Graphics2D g) {
         g.rotate(this.theta);
 
-        g.drawImage(PlayerCardsOverlay.BACK_IMAGE, Math.round(this.x), Math.round(this.y), null);
+        g.drawImage(this.image, Math.round(this.x), Math.round(this.y), null);
     }
 
     public boolean isConcluded() {

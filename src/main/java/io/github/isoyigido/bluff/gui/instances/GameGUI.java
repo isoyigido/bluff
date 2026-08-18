@@ -12,6 +12,7 @@ import io.github.isoyigido.bluff.game.cards.Rank;
 import io.github.isoyigido.bluff.game.client.GameClient;
 import io.github.isoyigido.bluff.game.client.GameEventListener;
 import io.github.isoyigido.bluff.gui.animation.DealCardsAnimation;
+import io.github.isoyigido.bluff.gui.animation.PlayCardsAnimation;
 import io.github.isoyigido.bluff.gui.components.game.ActionPanel;
 import io.github.isoyigido.bluff.gui.components.game.MiddleCardsComponent;
 import io.github.isoyigido.bluff.gui.components.game.PlayerCardsOverlay;
@@ -19,6 +20,7 @@ import io.github.isoyigido.bluff.gui.components.game.PlayerNamesOverlay;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -38,6 +40,10 @@ public class GameGUI extends GUI {
         super.addWidget(playerCardsOverlay.center());
         super.addWidget(middleCardsComponent.center());
         super.addWidget(actionPanel.top(ScreenConfig.xCenter, ScreenConfig.yCenter + 120));
+
+        PlayCardsAnimation playCardsAnimation = new PlayCardsAnimation(gameClient, middleCardsComponent, playerCardsOverlay, 2);
+
+        super.addWidget(playCardsAnimation.top(0, 0));
 
         TextComponent winnerText = new TextComponent(
                 "",
@@ -70,10 +76,23 @@ public class GameGUI extends GUI {
             @Override
             public void playedCards(GameClient.Player player, Rank rank, int numberOfCards) {
                 playerCardsOverlay.updatePlayerCards();
-                middleCardsComponent.updateCards();
                 actionPanel.updateElements();
 
                 middleCardsComponent.playCards(player, rank, numberOfCards);
+
+                playCardsAnimation.play(player, numberOfCards);
+            }
+
+            @Override
+            public void playedCards(Rank rank, Collection<Card> playedCards) {
+                GameClient.Player player = gameClient.getThisPlayer();
+
+                playerCardsOverlay.updatePlayerCards();
+                actionPanel.updateElements();
+
+                middleCardsComponent.playCards(player, rank, playedCards.size());
+
+                playCardsAnimation.play(playedCards);
             }
 
             @Override
@@ -93,7 +112,6 @@ public class GameGUI extends GUI {
             @Override
             public void setWinner() {
                 playerCardsOverlay.updatePlayerCards();
-                middleCardsComponent.updateCards();
                 actionPanel.updateElements();
 
                 this.concludeGame();
