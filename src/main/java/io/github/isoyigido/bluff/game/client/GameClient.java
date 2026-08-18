@@ -21,6 +21,7 @@ public final class GameClient implements AutoCloseable {
     public static final class Player {
         private final int connectionID;
         private final String name;
+        private int turnIndex = -1;
 
         private int numberOfCards = 0;
 
@@ -35,6 +36,10 @@ public final class GameClient implements AutoCloseable {
 
         public String getName() {
             return this.name;
+        }
+
+        public int getTurnIndex() {
+            return this.turnIndex;
         }
 
         public int getNumberOfCards() {
@@ -253,7 +258,11 @@ public final class GameClient implements AutoCloseable {
                     if (player == null) continue;
 
                     player.numberOfCards = dealtCards[i];
+
+                    player.turnIndex = i;
                 }
+
+                if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.startGame();
             }
 
             private void handleSetCards(Collection<Card> cards) {

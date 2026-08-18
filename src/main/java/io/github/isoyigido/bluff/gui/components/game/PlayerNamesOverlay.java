@@ -4,9 +4,11 @@ import io.github.isoyigido.basic.gui.app.Theme;
 import io.github.isoyigido.basic.gui.core.Component;
 import io.github.isoyigido.basic.gui.window.ScreenConfig;
 import io.github.isoyigido.bluff.game.client.GameClient;
+import io.github.isoyigido.bluff.utils.LoopingIterator;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class PlayerNamesOverlay extends Component {
@@ -20,11 +22,11 @@ public class PlayerNamesOverlay extends Component {
 
     private final int margin;
 
-    private final String[] playerNames;
+    private LoopingIterator<GameClient.Player> players;
 
-    private int numberOfOtherPlayers = 0;
+    private GameClient.Player thisPlayer;
 
-    private int playerInTurnIndex = -1;
+    private GameClient.Player playerInTurn;
 
     public PlayerNamesOverlay(GameClient gameClient, int margin) {
         super(ScreenConfig.screenWidth, ScreenConfig.screenHeight);
@@ -33,81 +35,82 @@ public class PlayerNamesOverlay extends Component {
 
         this.margin = margin;
 
-        this.playerNames = new String[4];
-
         this.updatePlayerNames();
     }
 
     public void updatePlayerNames() {
-        List<GameClient.Player> otherPlayers = new ArrayList<>(this.gameClient.getOtherPlayers().sequencedValues());
+        this.thisPlayer = this.gameClient.getThisPlayer();
 
-        this.numberOfOtherPlayers = otherPlayers.size();
+        List<GameClient.Player> players = new ArrayList<>(this.gameClient.getOtherPlayers().sequencedValues());
 
-        this.playerNames[0] = this.gameClient.getThisPlayer().getName();
+        players.add(this.thisPlayer);
 
-        int numberOfPlayers = otherPlayers.size() + 1;
+        players.sort(Comparator.comparing(GameClient.Player::getTurnIndex));
 
-        for (int i = 1; i < this.playerNames.length; i++) {
-            this.playerNames[i] = (i < numberOfPlayers) ? (otherPlayers.get(i - 1).getName()) : "";
-        }
+        this.players = LoopingIterator.of(players);
 
-        this.playerInTurnIndex = -1;
-
-        if (this.gameClient.isThisPlayerInTurn()) {
-            this.playerInTurnIndex = 0;
-
-            return;
-        }
-
-        GameClient.Player playerInTurn = this.gameClient.getPlayerInTurn();
-
-        for (int i = 0; i < otherPlayers.size(); i++) {
-            if (otherPlayers.get(i) == playerInTurn) {
-                this.playerInTurnIndex = i + 1;
-
-                return;
-            }
-        }
+        this.playerInTurn = this.gameClient.getPlayerInTurn();
     }
 
     @Override
     public void render(Graphics2D g) {
-        int leftIndex = 1;
-        int topIndex = 2;
-        int rightIndex = 3;
-
-        switch (this.numberOfOtherPlayers) {
-            case 1 -> {
-                topIndex = 1;
-                leftIndex = 2;
-            }
-            case 2 -> {
-                rightIndex = 2;
-                topIndex = 3;
-            }
-        }
-
         g.setFont(this.textFont);
-        g.setColor(this.textColor);
 
-        // --- BOTTOM (THIS PLAYER) ---
-        g.setColor((this.playerInTurnIndex == 0) ? PlayerNamesOverlay.IN_TURN_COLOR : this.textColor);
-        g.drawString(this.playerNames[0], ScreenConfig.xCenter - (this.textFontMetrics.stringWidth(this.playerNames[0]) / 2), ScreenConfig.screenHeight - this.margin);
+        LoopingIterator<GameClient.Player> players = this.players;
 
-        // --- TOP (OTHER PLAYER 3) ---
-        g.setColor((this.playerInTurnIndex == topIndex) ? PlayerNamesOverlay.IN_TURN_COLOR : this.textColor);
-        g.drawString(this.playerNames[topIndex], ScreenConfig.xCenter - (this.textFontMetrics.stringWidth(this.playerNames[topIndex]) / 2), this.margin + this.textFontMetrics.getAscent());
+        int numberOfPlayers = players.size();
 
-        // --- LEFT (OTHER PLAYER 1) ---
+        // --- THIS PLAYER (BOTTOM) ---
+        this.setColor(g, this.thisPlayer);
+        this.renderBottom(g, this.thisPlayer.getName());
+
+        if (numberOfPlayers < 2) return;
+
+        players.set(this.thisPlayer);
+
+        // --- NEXT PLAYER (TOP OR RIGHT) ---
+        GameClient.Player nextPlayer = players.next();
+        this.setColor(g, nextPlayer);
+        if (numberOfPlayers == 2) this.renderTop(g, nextPlayer.getName());
+        else this.renderRight(g, nextPlayer.getName());
+
+        if (numberOfPlayers < 3) return;
+
+        // --- NEXT PLAYER (LEFT OR TOP) ---
+        nextPlayer = players.next();
+        this.setColor(g, nextPlayer);
+        if (numberOfPlayers == 3) this.renderLeft(g, nextPlayer.getName());
+        else this.renderTop(g, nextPlayer.getName());
+
+        if (numberOfPlayers < 4) return;
+
+        // --- NEXT PLAYER (LEFT) ---
+        nextPlayer = players.next();
+        this.setColor(g, nextPlayer);
+        this.renderLeft(g, nextPlayer.getName());
+    }
+
+    private void setColor(Graphics2D g, GameClient.Player player) {
+        g.setColor((this.playerInTurn == player) ? PlayerNamesOverlay.IN_TURN_COLOR : this.textColor);
+    }
+
+    private void renderBottom(Graphics2D g, String name) {
+        g.drawString(name, ScreenConfig.xCenter - (this.textFontMetrics.stringWidth(name) / 2), ScreenConfig.screenHeight - this.margin);
+    }
+
+    private void renderRight(Graphics2D g, String name) {
+        g.rotate(-Math.PI / 2);
+        g.drawString(name, - (this.textFontMetrics.stringWidth(name) / 2) - ScreenConfig.yCenter, ScreenConfig.screenWidth - this.margin);
         g.rotate(Math.PI / 2);
+    }
 
-        g.setColor((this.playerInTurnIndex == leftIndex) ? PlayerNamesOverlay.IN_TURN_COLOR : this.textColor);
-        g.drawString(this.playerNames[leftIndex], ScreenConfig.yCenter - (this.textFontMetrics.stringWidth(this.playerNames[leftIndex]) / 2), -this.margin);
+    private void renderTop(Graphics2D g, String name) {
+        g.drawString(name, ScreenConfig.xCenter - (this.textFontMetrics.stringWidth(name) / 2), this.margin + this.textFontMetrics.getAscent());
+    }
 
-        // --- RIGHT (OTHER PLAYER 2) ---
-        g.rotate(-Math.PI);
-
-        g.setColor((this.playerInTurnIndex == rightIndex) ? PlayerNamesOverlay.IN_TURN_COLOR : this.textColor);
-        g.drawString(this.playerNames[rightIndex], - (this.textFontMetrics.stringWidth(this.playerNames[rightIndex]) / 2) - ScreenConfig.yCenter, ScreenConfig.screenWidth - this.margin);
+    private void renderLeft(Graphics2D g, String name) {
+        g.rotate(Math.PI / 2);
+        g.drawString(name, ScreenConfig.yCenter - (this.textFontMetrics.stringWidth(name) / 2), -this.margin);
+        g.rotate(-Math.PI / 2);
     }
 }

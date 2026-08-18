@@ -111,13 +111,14 @@ public class GameLobbyGUI extends GUI {
 
             @Override
             public void setGameState() {
-                if (gameClient.getGameState() == GameServer.GameState.PLAYING) {
-                    GUIManager.setGUI(() -> new GameGUI(gameClient));
-
-                    return;
-                }
+                if (gameClient.getGameState() == GameServer.GameState.PLAYING) return;
 
                 GameLobbyGUI.this.updateStartGameButton();
+            }
+
+            @Override
+            public void startGame() {
+                GUIManager.setGUI(() -> new GameGUI(gameClient));
             }
         });
 
