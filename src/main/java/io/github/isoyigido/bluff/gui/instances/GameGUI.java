@@ -11,6 +11,7 @@ import io.github.isoyigido.bluff.game.cards.Card;
 import io.github.isoyigido.bluff.game.cards.Rank;
 import io.github.isoyigido.bluff.game.client.GameClient;
 import io.github.isoyigido.bluff.game.client.GameEventListener;
+import io.github.isoyigido.bluff.gui.animation.DealCardsAnimation;
 import io.github.isoyigido.bluff.gui.components.game.ActionPanel;
 import io.github.isoyigido.bluff.gui.components.game.MiddleCardsComponent;
 import io.github.isoyigido.bluff.gui.components.game.PlayerCardsOverlay;
@@ -126,5 +127,7 @@ public class GameGUI extends GUI {
                 }
             }
         }.center());
+
+        super.addWidget(new DealCardsAnimation(middleCardsComponent, playerCardsOverlay, 3).top(0, 0));
     }
 }

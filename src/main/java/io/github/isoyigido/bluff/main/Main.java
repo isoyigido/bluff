@@ -7,6 +7,7 @@ import io.github.isoyigido.basic.gui.window.BasicWindow;
 import io.github.isoyigido.basic.gui.window.FullScreenWindow;
 import io.github.isoyigido.bluff.gui.ScreenConstants;
 import io.github.isoyigido.bluff.gui.instances.MainMenuGUI;
+import io.github.isoyigido.bluff.utils.AudioRegistry;
 import io.github.isoyigido.bluff.utils.ImageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,8 @@ public final class Main {
     private static final String ICON_PATH = "/game/cards/SA.png";
 
     public static void main(String[] args) {
+        AudioRegistry.register("card", "/game/audio/card.wav");
+
         Theme.registerColorTheme("/app/themes", "light", "dark");
 
         Theme.setColorTheme("dark");

@@ -41,7 +41,7 @@ public final class BotClient {
             public void setTurn() {
                 if (!gameClient.isThisPlayerInTurn()) return;
 
-                long delay = BotClient.random.nextInt(3000, 5000);
+                long delay = BotClient.random.nextInt(5000, 8000);
                 BotClient.scheduler.schedule(this::play, delay, TimeUnit.MILLISECONDS);
             }
 
