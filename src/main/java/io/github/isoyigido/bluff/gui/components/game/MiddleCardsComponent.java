@@ -54,8 +54,10 @@ public class MiddleCardsComponent extends Component {
     }
 
     public void updateCards() {
-        int numberOfCards = this.gameClient.getNumberOfCardsInTheMiddle();
+        this.setNumberOfCards(this.gameClient.getNumberOfCardsInTheMiddle());
+    }
 
+    public void setNumberOfCards(int numberOfCards) {
         this.cardCount.setText(Integer.toString(numberOfCards));
 
         this.widget.setVisible(numberOfCards > 0);
