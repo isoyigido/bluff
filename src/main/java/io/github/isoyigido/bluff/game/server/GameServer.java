@@ -76,8 +76,8 @@ public final class GameServer implements AutoCloseable {
         kryo.register(PlayerDisconnectedBroadcast.class);
         kryo.register(SetHostBroadcast.class);
         kryo.register(SetGameStateBroadcast.class);
+        kryo.register(StartGameBroadcast.class);
         kryo.register(SetCardsBroadcast.class);
-        kryo.register(AnonymousDealCardsBroadcast.class);
         kryo.register(SetTurnBroadcast.class);
         kryo.register(PlayedCardsBroadcast.class);
         kryo.register(AnonymousPlayedCardsBroadcast.class);
@@ -313,8 +313,8 @@ public final class GameServer implements AutoCloseable {
                 GameServer.this.server.sendToAllExceptTCP(connectionID, new PlayerDisconnectedBroadcast(connectionID));
             }
 
-            private void handleStartGameRequest(Player player) {
-                if (player != GameServer.this.host) {
+            private void handleStartGameRequest(Player host) {
+                if (host != GameServer.this.host) {
                     GameServer.logger.warn("Only the host can start the game.");
 
                     return;
@@ -360,21 +360,29 @@ public final class GameServer implements AutoCloseable {
                     playerIndex = (playerIndex + 1) % numberOfPlayers;
                 }
 
-                for (int i = 0; i < cardsToDeal.size(); i++) {
+                int[] playerIDs = new int[numberOfPlayers];
+                int[] dealtCards = new int[numberOfPlayers];
+
+                for (int i = 0; i < numberOfPlayers; i++) {
                     Player playerToDeal = players.get(i);
 
                     List<Card> cards = cardsToDeal.get(i);
 
+                    playerIDs[i] = playerToDeal.connectionID;
+                    dealtCards[i] = cards.size();
+
                     playerToDeal.cards.addAll(cards);
 
                     GameServer.logger.info("Dealt cards to player. id={} name={} cards={}", playerToDeal.connectionID, playerToDeal.name, cards);
-
-                    GameServer.this.server.sendToTCP(playerToDeal.connectionID, new SetCardsBroadcast(cards));
-
-                    GameServer.this.server.sendToAllExceptTCP(playerToDeal.connectionID, new AnonymousDealCardsBroadcast(playerToDeal.connectionID, cards.size()));
                 }
 
                 GameServer.logger.info("Dealt all cards.");
+
+                GameServer.this.server.sendToAllTCP(new StartGameBroadcast(playerIDs, dealtCards));
+
+                for (Player player : players) {
+                    GameServer.this.server.sendToTCP(player.connectionID, new SetCardsBroadcast(player.cards));
+                }
 
                 this.setTurn(players.get(firstPlayerIndex));
             }

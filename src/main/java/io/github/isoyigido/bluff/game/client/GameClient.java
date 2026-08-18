@@ -143,21 +143,21 @@ public final class GameClient implements AutoCloseable {
 
                     case SetGameStateBroadcast setGameStateBroadcast -> setGameStateBroadcast.getGameState().ifPresent(this::handleSetGameState);
 
+                    case StartGameBroadcast startGameBroadcast -> {
+                        int[] playerIDs = startGameBroadcast.getPlayerIDs();
+                        int[] dealtCards = startGameBroadcast.getDealtCards();
+
+                        GameClient.logger.info("Client received start game broadcast. id={} name={} dealtPlayerID={} numberOfCards={}", GameClient.this.thisPlayer.connectionID, GameClient.this.thisPlayer.name, Arrays.toString(playerIDs), Arrays.toString(dealtCards));
+
+                        this.handleStartGame(playerIDs, dealtCards);
+                    }
+
                     case SetCardsBroadcast setCardsBroadcast -> {
                         List<Card> cards = setCardsBroadcast.getCards();
 
                         GameClient.logger.info("Client received set cards broadcast. id={} name={} cards={}", GameClient.this.thisPlayer.connectionID, GameClient.this.thisPlayer.name, cards);
 
                         this.handleSetCards(cards);
-                    }
-
-                    case AnonymousDealCardsBroadcast anonymousDealCardsBroadcast -> {
-                        int playerID = anonymousDealCardsBroadcast.getPlayerID();
-                        int numberOfCards = anonymousDealCardsBroadcast.getNumberOfCards();
-
-                        GameClient.logger.info("Client received deal cards broadcast. id={} name={} dealtPlayerID={} numberOfCards={}", GameClient.this.thisPlayer.connectionID, GameClient.this.thisPlayer.name, playerID, numberOfCards);
-
-                        this.handleAnonymousDealCards(playerID, numberOfCards);
                     }
 
                     case SetTurnBroadcast setTurnBroadcast -> {
@@ -246,20 +246,20 @@ public final class GameClient implements AutoCloseable {
                 if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.setGameState();
             }
 
+            private void handleStartGame(int[] playerIDs, int[] dealtCards) {
+                for (int i = 0; i < playerIDs.length; i++) {
+                    Player player = this.getPlayer(playerIDs[i]);
+
+                    if (player == null) continue;
+
+                    player.numberOfCards = dealtCards[i];
+                }
+            }
+
             private void handleSetCards(Collection<Card> cards) {
                 GameClient.this.thisCards = new ArrayList<>(cards);
 
                 GameClient.this.thisPlayer.numberOfCards = GameClient.this.thisCards.size();
-
-                if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.setCards();
-            }
-
-            private void handleAnonymousDealCards(int playerID, int numberOfCards) {
-                Player dealtPlayer = this.getPlayer(playerID);
-
-                if (dealtPlayer == null) return;
-
-                dealtPlayer.numberOfCards += numberOfCards;
 
                 if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.setCards();
             }
