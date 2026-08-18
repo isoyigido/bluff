@@ -29,6 +29,7 @@ public class ActionPanel extends Component {
 
     private final Widget rankSelectionWidget;
 
+    private boolean selectingRank = false;
     private boolean selectedRank = true;
 
     private List<Card> selectedCards = new ArrayList<>(0);
@@ -138,6 +139,8 @@ public class ActionPanel extends Component {
     }
 
     public void updateElements() {
+        if (this.selectingRank) return;
+
         boolean inTurn = this.gameClient.isThisPlayerInTurn();
 
         if (this.selectedRank) {
@@ -195,12 +198,15 @@ public class ActionPanel extends Component {
         this.panelWidget.hide();
 
         this.rankSelectionWidget.show();
+
+        this.selectingRank = true;
     }
 
     private void changeRank(Rank rank) {
         this.rankSelectionWidget.hide();
 
         this.selectedRank = true;
+        this.selectingRank = false;
 
         this.gameClient.changeRank(rank, this.selectedCards);
     }
