@@ -3,6 +3,7 @@ package io.github.isoyigido.bluff.gui.components.game;
 import io.github.isoyigido.basic.gui.core.Component;
 import io.github.isoyigido.basic.gui.core.MouseButton;
 import io.github.isoyigido.bluff.game.cards.Card;
+import io.github.isoyigido.bluff.gui.CardImage;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

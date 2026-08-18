@@ -3,6 +3,7 @@ package io.github.isoyigido.bluff.gui.components.game;
 import io.github.isoyigido.basic.gui.core.Component;
 import io.github.isoyigido.basic.gui.window.ScreenConfig;
 import io.github.isoyigido.bluff.game.client.GameClient;
+import io.github.isoyigido.bluff.gui.CardImage;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
