@@ -36,14 +36,18 @@ public class GameGUI extends GUI {
         PlayerCardsOverlay playerCardsOverlay = new PlayerCardsOverlay(gameClient, actionPanel, 80, 20);
         MiddleCardsComponent middleCardsComponent = new MiddleCardsComponent(gameClient, 20);
 
-        super.addWidget(playerNamesOverlay.center());
         super.addWidget(playerCardsOverlay.center());
         super.addWidget(middleCardsComponent.center());
-        super.addWidget(actionPanel.top(ScreenConfig.xCenter, ScreenConfig.yCenter + 120));
+
+        super.addWidget(new DealCardsAnimation(middleCardsComponent, playerCardsOverlay, 3).top(0, 0));
 
         PlayCardsAnimation playCardsAnimation = new PlayCardsAnimation(gameClient, middleCardsComponent, playerCardsOverlay, 2);
 
         super.addWidget(playCardsAnimation.top(0, 0));
+
+        super.addWidget(playerNamesOverlay.center());
+
+        super.addWidget(actionPanel.top(ScreenConfig.xCenter, ScreenConfig.yCenter + 120));
 
         TextComponent winnerText = new TextComponent(
                 "",
@@ -145,7 +149,5 @@ public class GameGUI extends GUI {
                 }
             }
         }.center());
-
-        super.addWidget(new DealCardsAnimation(middleCardsComponent, playerCardsOverlay, 3).top(0, 0));
     }
 }
