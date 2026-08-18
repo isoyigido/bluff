@@ -37,17 +37,27 @@ public class RankSelectionComponent extends Button {
                 () -> {}
         );
 
-        super.setLabel(this.ranks[this.selectedIndex]);
+        this.setSelectedIndex(0);
 
-        super.setMouseButtonAction(MouseButton.LEFT, () -> onSelection.accept(Rank.values()[this.selectedIndex]));
+        super.setMouseButtonAction(MouseButton.LEFT, () -> {
+            onSelection.accept(Rank.values()[this.selectedIndex]);
+            this.setSelectedIndex(0);
+        });
     }
 
     @Override
     public void mouseWheelEvent(MouseWheelEvent e) {
         if (!super.isActive()) return;
 
-        this.selectedIndex = Math.clamp(this.selectedIndex - e.getWheelRotation(), 0, this.ranks.length - 1);
+        this.setSelectedIndex(Math.clamp(this.selectedIndex - e.getWheelRotation(), 0, this.ranks.length - 1));
+    }
 
+    private void setSelectedIndex(int selectedIndex) {
+        this.selectedIndex = selectedIndex;
+        this.updateLabel();
+    }
+
+    private void updateLabel() {
         super.setLabel(this.ranks[this.selectedIndex]);
     }
 }
