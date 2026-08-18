@@ -17,12 +17,12 @@
   },
   "game": {
     "waiting_text": "%s bekleniyor.",
-    "played_cards": "%s %s adet %s fırlattı.",
+    "played_cards": "%s %s adet %s oynadı.",
     "called_bullshit": {
       "right": "%s, %s oyuncusunun blöfünü yakaladı!",
       "wrong": "%s, %s oyuncusunu haksız yere suçladı!"
     },
-    "win_message": "%s oyunu kazandı!"
+    "win_message": "%s kartlarını bitirdi ve oyunu kazandı!"
   },
   "color_themes": {
     "dark": "Koyu",
