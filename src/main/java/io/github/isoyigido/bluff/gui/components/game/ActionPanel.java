@@ -29,7 +29,7 @@ public class ActionPanel extends Component {
 
     private final Widget rankSelectionWidget;
 
-    private boolean selectingRank = false;
+    private boolean selectedRank = true;
 
     private List<Card> selectedCards = new ArrayList<>(0);
 
@@ -138,9 +138,15 @@ public class ActionPanel extends Component {
     }
 
     public void updateElements() {
-        if (this.selectingRank) return;
+        boolean inTurn = this.gameClient.isThisPlayerInTurn();
 
-        if (!this.gameClient.isThisPlayerInTurn() || (this.gameClient.getGameState() != GameServer.GameState.PLAYING)) {
+        if (this.selectedRank) {
+            if (inTurn) return;
+
+            this.selectedRank = false;
+        }
+
+        if (!inTurn || (this.gameClient.getGameState() != GameServer.GameState.PLAYING)) {
             this.panelWidget.hide();
 
             this.rankSelectionWidget.hide();
@@ -186,8 +192,6 @@ public class ActionPanel extends Component {
     }
 
     private void changeRank() {
-        this.selectingRank = true;
-
         this.panelWidget.hide();
 
         this.rankSelectionWidget.show();
@@ -196,9 +200,7 @@ public class ActionPanel extends Component {
     private void changeRank(Rank rank) {
         this.rankSelectionWidget.hide();
 
-        this.selectingRank = false;
-
-        this.updateElements();
+        this.selectedRank = true;
 
         this.gameClient.changeRank(rank, this.selectedCards);
     }
