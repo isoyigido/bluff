@@ -1,4 +1,4 @@
-package io.github.isoyigido.bluff.gui.components.game;
+package io.github.isoyigido.bluff.gui;
 
 import io.github.isoyigido.basic.gui.core.Component;
 import io.github.isoyigido.bluff.game.cards.Card;
