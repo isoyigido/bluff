@@ -3,14 +3,14 @@ package io.github.isoyigido.bluff.gui.components.game;
 import io.github.isoyigido.basic.gui.core.Anchor;
 import io.github.isoyigido.basic.gui.core.Component;
 import io.github.isoyigido.basic.gui.window.ScreenConfig;
+import io.github.isoyigido.bluff.game.cards.Card;
 import io.github.isoyigido.bluff.game.client.GameClient;
 import io.github.isoyigido.bluff.gui.CardImage;
 import io.github.isoyigido.bluff.utils.LoopingIterator;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
 
 public class PlayerCardsOverlay extends Component {
@@ -19,6 +19,8 @@ public class PlayerCardsOverlay extends Component {
 
     public static final BufferedImage BACK_IMAGE = CardImage.back(PlayerCardsOverlay.CARD_WIDTH, PlayerCardsOverlay.CARD_HEIGHT);
 
+    private static final float HALF_PI = (float) (Math.PI / 2);
+
     private final GameClient gameClient;
 
     private final int gap;
@@ -26,6 +28,10 @@ public class PlayerCardsOverlay extends Component {
     private final CardSelectionPanel cardSelectionPanel;
 
     private int numberOfPlayers;
+
+    private boolean hideRight;
+    private boolean hideTop;
+    private boolean hideLeft;
 
     private int[] bottomX;
     private int[] rightX;
@@ -36,6 +42,12 @@ public class PlayerCardsOverlay extends Component {
     private final int rightY;
     private final int topY;
     private final int leftY;
+
+    private Map<GameClient.Player, Position> playerPositionMap;
+
+    public enum Position {
+        RIGHT, TOP, LEFT, BOTTOM
+    }
 
     public PlayerCardsOverlay(GameClient gameClient, ActionPanel actionPanel, int margin, int gap) {
         super(ScreenConfig.screenWidth, ScreenConfig.screenHeight);
@@ -71,7 +83,7 @@ public class PlayerCardsOverlay extends Component {
     }
 
     private void updateCoordinates(List<GameClient.Player> players) {
-        int[] bottomX = this.cardSelectionPanel.getXCoordinates().clone();
+        int[] bottomX = this.cardSelectionPanel.getXCoordinates(this.gameClient.getThisPlayer().getNumberOfCards()).clone();
 
         int cardSelectionPanelX = this.cardSelectionPanel.getWidget().getX(Anchor.LEFT);
 
@@ -83,23 +95,31 @@ public class PlayerCardsOverlay extends Component {
 
         LoopingIterator<GameClient.Player> iterator = LoopingIterator.of(players);
 
-        iterator.set(this.gameClient.getThisPlayer());
+        GameClient.Player thisPlayer = this.gameClient.getThisPlayer();
 
-        switch (players.size()) {
+        iterator.set(thisPlayer);
+
+        int numberOfPlayers = players.size();
+
+        Map<GameClient.Player, Position> playerPositionMap = new HashMap<>(numberOfPlayers);
+
+        playerPositionMap.put(thisPlayer, Position.BOTTOM);
+
+        switch (numberOfPlayers) {
             case 2 -> {
                 this.rightX = new int[0];
-                this.topX = this.getTopX(iterator.next().getNumberOfCards());
+                this.topX = this.getTopX(iterator.next(), playerPositionMap);
                 this.leftX = new int[0];
             }
             case 3 -> {
-                this.rightX = this.getRightX(iterator.next().getNumberOfCards());
+                this.rightX = this.getRightX(iterator.next(), playerPositionMap);
                 this.topX = new int[0];
-                this.leftX = this.getLeftX(iterator.next().getNumberOfCards());
+                this.leftX = this.getLeftX(iterator.next(), playerPositionMap);
             }
             case 4 -> {
-                this.rightX = this.getRightX(iterator.next().getNumberOfCards());
-                this.topX = this.getTopX(iterator.next().getNumberOfCards());
-                this.leftX = this.getLeftX(iterator.next().getNumberOfCards());
+                this.rightX = this.getRightX(iterator.next(), playerPositionMap);
+                this.topX = this.getTopX(iterator.next(), playerPositionMap);
+                this.leftX = this.getLeftX(iterator.next(), playerPositionMap);
             }
             default -> {
                 this.rightX = new int[0];
@@ -107,6 +127,26 @@ public class PlayerCardsOverlay extends Component {
                 this.leftX = new int[0];
             }
         }
+
+        this.playerPositionMap = playerPositionMap;
+    }
+
+    private int[] getRightX(GameClient.Player player, Map<GameClient.Player, Position> playerPositionMap) {
+        playerPositionMap.put(player, Position.RIGHT);
+
+        return this.getRightX(player.getNumberOfCards());
+    }
+
+    private int[] getTopX(GameClient.Player player, Map<GameClient.Player, Position> playerPositionMap) {
+        playerPositionMap.put(player, Position.TOP);
+
+        return this.getTopX(player.getNumberOfCards());
+    }
+
+    public int[] getLeftX(GameClient.Player player, Map<GameClient.Player, Position> playerPositionMap) {
+        playerPositionMap.put(player, Position.LEFT);
+
+        return this.getLeftX(player.getNumberOfCards());
     }
 
     private int[] getRightX(int numberOfCards) {
@@ -182,19 +222,25 @@ public class PlayerCardsOverlay extends Component {
     }
 
     private void renderCardsRight(Graphics2D g, int[] x) {
-        g.rotate(-Math.PI / 2);
+        if (this.hideRight) return;
+
+        g.rotate(-PlayerCardsOverlay.HALF_PI);
         PlayerCardsOverlay.renderCards(g, x, this.rightY);
-        g.rotate(Math.PI / 2);
+        g.rotate(PlayerCardsOverlay.HALF_PI);
     }
 
     private void renderCardsTop(Graphics2D g, int[] x) {
+        if (this.hideTop) return;
+
         PlayerCardsOverlay.renderCards(g, x, this.topY);
     }
 
     private void renderCardsLeft(Graphics2D g, int[] x) {
-        g.rotate(Math.PI / 2);
+        if (this.hideLeft) return;
+
+        g.rotate(PlayerCardsOverlay.HALF_PI);
         PlayerCardsOverlay.renderCards(g, x, this.leftY);
-        g.rotate(-Math.PI / 2);
+        g.rotate(-PlayerCardsOverlay.HALF_PI);
     }
 
     public int[] getBottomX() {
@@ -227,5 +273,69 @@ public class PlayerCardsOverlay extends Component {
 
     public int getLeftY() {
         return this.leftY;
+    }
+
+    public void hidePlayer(GameClient.Player player) {
+        switch (this.playerPositionMap.get(player)) {
+            case BOTTOM -> this.cardSelectionPanel.getWidget().hide();
+            case RIGHT -> this.hideRight = true;
+            case TOP -> this.hideTop = true;
+            case LEFT -> this.hideLeft = true;
+        }
+    }
+
+    public void showAll() {
+        this.cardSelectionPanel.getWidget().show();
+        this.hideRight = false;
+        this.hideTop = false;
+        this.hideLeft = false;
+    }
+
+    public Optional<int[]> getCardsX(GameClient.Player player) {
+        return Optional.ofNullable(switch (this.playerPositionMap.get(player)) {
+            case BOTTOM -> this.bottomX;
+            case RIGHT -> this.rightX;
+            case TOP -> this.topX;
+            case LEFT -> this.leftX;
+            case null -> null;
+        });
+    }
+
+    public int getCardsY(GameClient.Player player) {
+        return switch (this.playerPositionMap.get(player)) {
+            case BOTTOM -> this.bottomY;
+            case RIGHT -> this.rightY;
+            case TOP -> this.topY;
+            case LEFT -> this.leftY;
+            case null -> 0;
+        };
+    }
+
+    public float getCardsTheta(GameClient.Player player) {
+        return switch (this.playerPositionMap.get(player)) {
+            case BOTTOM, TOP -> 0.0f;
+            case RIGHT -> -PlayerCardsOverlay.HALF_PI;
+            case LEFT -> PlayerCardsOverlay.HALF_PI;
+            case null -> 0.0f;
+        };
+    }
+
+    public Optional<int[]> getCardsX(GameClient.Player player, int numberOfCards) {
+        return Optional.ofNullable(switch (this.playerPositionMap.get(player)) {
+            case BOTTOM -> {
+                int[] x = this.cardSelectionPanel.getXCoordinates(numberOfCards);
+                int cardSelectionX = this.cardSelectionPanel.getWidget().getX(Anchor.LEFT);
+                for (int i = 0; i < x.length; i++) x[i] += cardSelectionX;
+                yield x;
+            }
+            case RIGHT -> this.getRightX(numberOfCards);
+            case TOP -> this.getTopX(numberOfCards);
+            case LEFT -> this.getLeftX(numberOfCards);
+            case null -> null;
+        });
+    }
+
+    public List<Card> getThisCards() {
+        return this.cardSelectionPanel.getCards();
     }
 }

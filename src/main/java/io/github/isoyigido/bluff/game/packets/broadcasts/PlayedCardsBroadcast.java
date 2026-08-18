@@ -14,10 +14,11 @@ public class PlayedCardsBroadcast {
 
     private int currentRankOrdinal;
     private int numberOfCards;
+    private int[] playedCardIDs;
     private int[] remainingCardIDs;
 
-    public PlayedCardsBroadcast(int currentRankOrdinal, int numberOfCards, List<Card> remainingCards) {
-        this(currentRankOrdinal, numberOfCards, PlayedCardsBroadcast.getCardIDs(remainingCards));
+    public PlayedCardsBroadcast(int currentRankOrdinal, int numberOfCards, List<Card> playedCards, List<Card> remainingCards) {
+        this(currentRankOrdinal, numberOfCards, PlayedCardsBroadcast.getCardIDs(playedCards), PlayedCardsBroadcast.getCardIDs(remainingCards));
     }
 
     private static int[] getCardIDs(List<Card> cards) {
@@ -30,9 +31,10 @@ public class PlayedCardsBroadcast {
         return cardIDs;
     }
 
-    public PlayedCardsBroadcast(int currentRankOrdinal, int numberOfCards, int[] remainingCardIDs) {
+    public PlayedCardsBroadcast(int currentRankOrdinal, int numberOfCards, int[] playedCardIDs, int[] remainingCardIDs) {
         this.currentRankOrdinal = currentRankOrdinal;
         this.numberOfCards = numberOfCards;
+        this.playedCardIDs = playedCardIDs;
         this.remainingCardIDs = remainingCardIDs;
     }
 
@@ -52,12 +54,20 @@ public class PlayedCardsBroadcast {
         return this.numberOfCards;
     }
 
+    public List<Card> getPlayedCards() {
+        return PlayedCardsBroadcast.getCards(this.playedCardIDs);
+    }
+
     public List<Card> getRemainingCards() {
-        int numberOfCards = this.remainingCardIDs.length;
+        return PlayedCardsBroadcast.getCards(this.remainingCardIDs);
+    }
+
+    private static List<Card> getCards(int[] cardIDs) {
+        int numberOfCards = cardIDs.length;
 
         List<Card> cards = new ArrayList<>(numberOfCards);
 
-        for (Integer cardID : this.remainingCardIDs) {
+        for (Integer cardID : cardIDs) {
             Card.get(cardID).ifPresentOrElse(
                     cards::add,
                     () -> PlayedCardsBroadcast.logger.warn("Encountered invalid card ID number. id={}", cardID)

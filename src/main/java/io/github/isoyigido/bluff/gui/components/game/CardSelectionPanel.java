@@ -66,24 +66,21 @@ public class CardSelectionPanel extends Component {
     }
 
     private void updateHitboxes(int numberOfCards) {
-        if (numberOfCards == 0) {
-            this.hitboxes = new ArrayList<>(0);
-
-            return;
-        }
-
-        if (numberOfCards == 1) {
-            this.hitboxes = List.of(new Rectangle(
-                    (this.maximumPanelWidth - PlayerCardsOverlay.CARD_WIDTH) / 2, 0,
-                    PlayerCardsOverlay.CARD_WIDTH, PlayerCardsOverlay.CARD_HEIGHT
-            ));
-
-            return;
-        }
-
-        int[] xCoordinates = new int[numberOfCards];
+        this.xCoordinates = this.getXCoordinates(numberOfCards);
 
         List<Rectangle> hitboxes = new ArrayList<>(numberOfCards);
+
+        for (int i = 0; i < numberOfCards; i++) {
+            hitboxes.add(new Rectangle(this.xCoordinates[i], 0, PlayerCardsOverlay.CARD_WIDTH, PlayerCardsOverlay.CARD_HEIGHT));
+        }
+
+        this.hitboxes = hitboxes;
+    }
+
+    public int[] getXCoordinates(int numberOfCards) {
+        if (numberOfCards == 1) {
+            return new int[]{(this.maximumPanelWidth - PlayerCardsOverlay.CARD_WIDTH) / 2};
+        }
 
         int gap = Math.min(this.maximumGap, (this.maximumPanelWidth - (numberOfCards * PlayerCardsOverlay.CARD_WIDTH)) / (numberOfCards - 1));
 
@@ -91,16 +88,13 @@ public class CardSelectionPanel extends Component {
 
         int xStart = (this.maximumPanelWidth - width) / 2;
 
-        for (int i = 0; i < numberOfCards; i++) {
-            int x = xStart + (i * (gap + PlayerCardsOverlay.CARD_WIDTH));
+        int[] x = new int[numberOfCards];
 
-            hitboxes.add(new Rectangle(x, 0, PlayerCardsOverlay.CARD_WIDTH, PlayerCardsOverlay.CARD_HEIGHT));
-
-            xCoordinates[i] = x;
+        for (int i = 0; i < x.length; i++) {
+            x[i] = xStart + (i * (gap + PlayerCardsOverlay.CARD_WIDTH));
         }
 
-        this.hitboxes = hitboxes;
-        this.xCoordinates = xCoordinates;
+        return x;
     }
 
     private void resolveSelectedCards() {
@@ -152,6 +146,10 @@ public class CardSelectionPanel extends Component {
         else this.selectedCards.remove(this.cards.get(index));
 
         this.actionPanel.setSelectedCards(this.selectedCards);
+    }
+
+    public List<Card> getCards() {
+        return this.cards;
     }
 
     public int[] getXCoordinates() {

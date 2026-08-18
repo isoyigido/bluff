@@ -14,7 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
 
 public final class GameServer implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(GameServer.class);
@@ -387,7 +390,7 @@ public final class GameServer implements AutoCloseable {
                 this.setTurn(players.get(firstPlayerIndex));
             }
 
-            private boolean handlePlayCardsRequest(Player player, Collection<Card> cards) {
+            private boolean handlePlayCardsRequest(Player player, List<Card> cards) {
                 if (GameServer.this.gameState == GameState.CONCLUDED) {
                     GameServer.logger.warn("Cannot play cards because the game has already concluded.");
 
@@ -447,7 +450,7 @@ public final class GameServer implements AutoCloseable {
                 GameServer.logger.info("Player played cards. id={} name={} cards={}", player.connectionID, player.name, cardsToPlay);
 
                 GameServer.this.server.sendToAllExceptTCP(player.connectionID, new AnonymousPlayedCardsBroadcast(player.connectionID, currentRankOrdinal, numberOfPlayedCards));
-                GameServer.this.server.sendToTCP(player.connectionID, new PlayedCardsBroadcast(currentRankOrdinal, numberOfPlayedCards, player.cards));
+                GameServer.this.server.sendToTCP(player.connectionID, new PlayedCardsBroadcast(currentRankOrdinal, numberOfPlayedCards, cards, player.cards));
 
                 if (finisher) this.setWinner(player);
 
@@ -566,7 +569,7 @@ public final class GameServer implements AutoCloseable {
                 this.nextTurn();
             }
 
-            private void handleChangeRankRequest(Player player, Rank rank, Collection<Card> cards) {
+            private void handleChangeRankRequest(Player player, Rank rank, List<Card> cards) {
                 if (GameServer.this.gameState == GameState.CONCLUDED) {
                     GameServer.logger.warn("Cannot change rank because the game has already concluded.");
 

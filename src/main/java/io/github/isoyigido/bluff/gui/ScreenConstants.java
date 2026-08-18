@@ -5,6 +5,6 @@ public final class ScreenConstants {
         throw new UnsupportedOperationException("Constants class cannot be instantiated.");
     }
 
-    public static final int FPS = 120;
-    public static final int UPS = 60;
+    public static final int FPS = 60;
+    public static final int UPS = 120;
 }

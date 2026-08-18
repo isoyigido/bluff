@@ -3,6 +3,7 @@ package io.github.isoyigido.bluff.game.client;
 import io.github.isoyigido.bluff.game.cards.Card;
 import io.github.isoyigido.bluff.game.cards.Rank;
 
+import java.util.Collection;
 import java.util.List;
 
 public class GameEventListener {
@@ -19,6 +20,8 @@ public class GameEventListener {
     public void setCards() {}
 
     public void setTurn() {}
+
+    public void playedCards(Rank rank, Collection<Card> playedCards) {}
 
     public void playedCards(GameClient.Player player, Rank rank, int numberOfCards) {}
 
