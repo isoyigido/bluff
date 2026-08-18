@@ -84,7 +84,7 @@ public final class BotClient {
                     return;
                 }
 
-                if (BotClient.random.nextInt(0, 4) == 0) {
+                if ((lastPlayedCardNumber > 0) && (BotClient.random.nextInt(0, 4) == 0)) {
                     gameClient.callBullshit();
 
                     return;
