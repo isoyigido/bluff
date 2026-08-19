@@ -22,7 +22,7 @@
       "right": "%s correctly called bullshit on %s!",
       "wrong": "%s falsely accused %s!"
     },
-    "win_message": "%s ran out of cards and won the game!"
+    "win_message": "%s won the game!"
   },
   "color_themes": {
     "dark": "Dark",

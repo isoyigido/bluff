@@ -22,7 +22,7 @@
       "right": "%s, %s oyuncusunun blöfünü yakaladı!",
       "wrong": "%s, %s oyuncusunu haksız yere suçladı!"
     },
-    "win_message": "%s kartlarını bitirdi ve oyunu kazandı!"
+    "win_message": "%s oyunu kazandı!"
   },
   "color_themes": {
     "dark": "Koyu",
