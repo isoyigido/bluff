@@ -49,34 +49,15 @@ public class DealCardsAnimation extends Component {
         this.addedAnimations = new ArrayList<>(totalNumberOfAnimations);
         this.activeAnimations = new ArrayList<>(totalNumberOfAnimations);
 
-        boolean playAudio = true;
-
-        for (int x : bottomX) {
-            this.animationPool.add(new CardAnimation(x1, y1, x, bottomY, 0.0f, 0.0f, individualDuration, playAudio));
-            playAudio = false;
-        }
-
-        playAudio = true;
-
         float halfPi = (float) (Math.PI / 2);
 
-        for (int x : rightX) {
-            this.animationPool.add(new CardAnimation(x1, y1, x, rightY, 0.0f, -halfPi, individualDuration, playAudio));
-            playAudio = false;
-        }
+        int idx1 = 0, idx2 = 0, idx3 = 0, idx4 = 0;
 
-        playAudio = true;
-
-        for (int x : topX) {
-            this.animationPool.add(new CardAnimation(x1, y1, x, topY, 0.0f, 0.0f, individualDuration, playAudio));
-            playAudio = false;
-        }
-
-        playAudio = true;
-
-        for (int x : leftX) {
-            this.animationPool.add(new CardAnimation(x1, y1, x, leftY, 0.0f, halfPi, individualDuration, playAudio));
-            playAudio = false;
+        while ((idx1 < bottomX.length) || (idx2 < rightX.length) || (idx3 < topX.length) || (idx4 < leftX.length)) {
+            if (idx1 < bottomX.length) this.animationPool.add(new CardAnimation(x1, y1, bottomX[idx1++], bottomY, 0.0f, 0.0f, individualDuration, (idx1 % 4) == 0));
+            if (idx2 < rightX.length)  this.animationPool.add(new CardAnimation(x1, y1, rightX[idx2++],  rightY,  0.0f, -halfPi,     individualDuration, false));
+            if (idx3 < topX.length)    this.animationPool.add(new CardAnimation(x1, y1, topX[idx3++],    topY,    0.0f, 0.0f, individualDuration, false));
+            if (idx4 < leftX.length)   this.animationPool.add(new CardAnimation(x1, y1, leftX[idx4++],   leftY,   0.0f, halfPi,      individualDuration, false));
         }
     }
 
