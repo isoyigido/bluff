@@ -21,9 +21,9 @@ public class PlayCardsAnimation extends Component {
     private final MiddleCardsComponent middleCardsComponent;
     private final PlayerCardsOverlay playerCardsOverlay;
 
-    private final int duration;
+    private final float duration;
 
-    public PlayCardsAnimation(GameClient gameClient, MiddleCardsComponent middleCardsComponent, PlayerCardsOverlay playerCardsOverlay, int duration) {
+    public PlayCardsAnimation(GameClient gameClient, MiddleCardsComponent middleCardsComponent, PlayerCardsOverlay playerCardsOverlay, float duration) {
         this.gameClient = gameClient;
 
         this.middleCardsComponent = middleCardsComponent;
