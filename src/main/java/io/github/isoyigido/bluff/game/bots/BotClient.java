@@ -46,7 +46,7 @@ public final class BotClient {
             }
 
             @Override
-            public void calledBullshit(GameClient.Player accuser, GameClient.Player accused, List<Card> cards, boolean bluff) {
+            public void calledBullshit(GameClient.Player accuser, GameClient.Player accused, List<Card> playedCards, boolean bluff, int numberOfMiddleCards, List<Card> middleCards) {
                 this.numberOfMatchingCards = -1;
             }
 
