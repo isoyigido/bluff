@@ -22,7 +22,7 @@ public class DealCardsAnimation extends Component {
     private final MiddleCardsComponent middleCardsComponent;
     private final PlayerCardsOverlay playerCardsOverlay;
 
-    public DealCardsAnimation(MiddleCardsComponent middleCardsComponent, PlayerCardsOverlay playerCardsOverlay, int individualDuration) {
+    public DealCardsAnimation(MiddleCardsComponent middleCardsComponent, PlayerCardsOverlay playerCardsOverlay, float individualDuration) {
         this.middleCardsComponent = middleCardsComponent;
         this.playerCardsOverlay = playerCardsOverlay;
 
