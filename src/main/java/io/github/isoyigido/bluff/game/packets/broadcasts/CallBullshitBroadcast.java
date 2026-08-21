@@ -14,9 +14,10 @@ public class CallBullshitBroadcast {
     private int accusedID;
     private int[] playedCardIDs;
     private boolean bluff;
+    private int numberOfMiddleCards;
 
-    public CallBullshitBroadcast(int accuserID, int accusedID, List<Card> playedCards, boolean bluff) {
-        this(accuserID, accusedID, CallBullshitBroadcast.getCardIDs(playedCards), bluff);
+    public CallBullshitBroadcast(int accuserID, int accusedID, List<Card> playedCards, boolean bluff, int numberOfMiddleCards) {
+        this(accuserID, accusedID, CallBullshitBroadcast.getCardIDs(playedCards), bluff, numberOfMiddleCards);
     }
 
     private static int[] getCardIDs(List<Card> cards) {
@@ -31,11 +32,12 @@ public class CallBullshitBroadcast {
         return cardIDs;
     }
 
-    public CallBullshitBroadcast(int accuserID, int accusedID, int[] playedCardIDs, boolean bluff) {
+    public CallBullshitBroadcast(int accuserID, int accusedID, int[] playedCardIDs, boolean bluff, int numberOfMiddleCards) {
         this.accuserID = accuserID;
         this.accusedID = accusedID;
         this.playedCardIDs = playedCardIDs;
         this.bluff = bluff;
+        this.numberOfMiddleCards = numberOfMiddleCards;
     }
 
     public int getAccuserID() {
@@ -63,6 +65,10 @@ public class CallBullshitBroadcast {
 
     public boolean isBluff() {
         return this.bluff;
+    }
+
+    public int getNumberOfMiddleCards() {
+        return this.numberOfMiddleCards;
     }
 
     private CallBullshitBroadcast() {}

@@ -24,6 +24,9 @@ public final class Main {
 
     public static void main(String[] args) {
         AudioRegistry.register("card", "/game/audio/card.wav");
+        AudioRegistry.register("referee", "/game/audio/referee.wav");
+        AudioRegistry.register("correct", "/game/audio/correct.wav");
+        AudioRegistry.register("wrong", "/game/audio/wrong.wav");
 
         Theme.registerColorTheme("/app/themes", "light", "dark");
 

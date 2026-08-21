@@ -25,7 +25,7 @@ public class GameEventListener {
 
     public void playedCards(GameClient.Player player, Rank rank, int numberOfCards) {}
 
-    public void calledBullshit(GameClient.Player accuser, GameClient.Player accused, List<Card> cards, boolean bluff) {}
+    public void calledBullshit(GameClient.Player accuser, GameClient.Player accused, List<Card> playedCards, boolean bluff, int numberOfMiddleCards, List<Card> middleCards) {}
 
     public void setAllPassed() {}
 

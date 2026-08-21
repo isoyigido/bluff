@@ -6,12 +6,10 @@ import io.github.isoyigido.basic.gui.core.Component;
 import io.github.isoyigido.basic.gui.core.Widget;
 import io.github.isoyigido.basic.gui.core.components.ImageComponent;
 import io.github.isoyigido.basic.gui.core.components.TextComponent;
-import io.github.isoyigido.bluff.game.cards.Card;
 import io.github.isoyigido.bluff.game.cards.Rank;
 import io.github.isoyigido.bluff.game.client.GameClient;
 
 import java.awt.*;
-import java.util.List;
 import java.util.Locale;
 
 public class MiddleCardsComponent extends Component {
@@ -68,7 +66,7 @@ public class MiddleCardsComponent extends Component {
         this.actionText.setColor(this.textColor);
     }
 
-    public void callBullshit(GameClient.Player accuser, GameClient.Player accused, List<Card> cards, boolean bluff) {
+    public void callBullshit(GameClient.Player accuser, GameClient.Player accused, boolean bluff) {
         this.actionText.setText((bluff ? Translator.get("game.called_bullshit.right") : Translator.get("game.called_bullshit.wrong")).formatted(accuser.getName(), accused.getName()));
         this.actionText.setColor(Color.RED);
     }

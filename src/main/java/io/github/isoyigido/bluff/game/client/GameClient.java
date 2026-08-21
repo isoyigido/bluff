@@ -194,10 +194,23 @@ public final class GameClient implements AutoCloseable {
                         int accusedID = callBullshitBroadcast.getAccusedID();
                         List<Card> playedCards = callBullshitBroadcast.getPlayedCards();
                         boolean bluff = callBullshitBroadcast.isBluff();
+                        int numberOfMiddleCards = callBullshitBroadcast.getNumberOfMiddleCards();
 
-                        GameClient.logger.info("Client received call bullshit broadcast. id={} name={} accuserID={} accusedID={} playedCards={} bluff={}", GameClient.this.thisPlayer.connectionID, GameClient.this.thisPlayer.name, accuserID, accusedID, playedCards, bluff);
+                        GameClient.logger.info("Client received call bullshit broadcast. id={} name={} accuserID={} accusedID={} playedCards={} bluff={} numberOfMiddleCards={}", GameClient.this.thisPlayer.connectionID, GameClient.this.thisPlayer.name, accuserID, accusedID, playedCards, bluff, numberOfMiddleCards);
 
-                        this.handleCallBullshit(accuserID, accusedID, playedCards, bluff);
+                        this.handleCallBullshit(accuserID, accusedID, playedCards, bluff, numberOfMiddleCards, null);
+                    }
+
+                    case GatherMiddleBroadcast gatherMiddleBroadcast -> {
+                        int accuserID = gatherMiddleBroadcast.getAccuserID();
+                        int accusedID = gatherMiddleBroadcast.getAccusedID();
+                        List<Card> playedCards = gatherMiddleBroadcast.getPlayedCards();
+                        boolean bluff = gatherMiddleBroadcast.isBluff();
+                        List<Card> middleCards = gatherMiddleBroadcast.getMiddleCards();
+
+                        GameClient.logger.info("Client received gather middle broadcast. id={} name={} accuserID={} accusedID={} playedCards={} bluff={} middleCards={}", GameClient.this.thisPlayer.connectionID, GameClient.this.thisPlayer.name, accuserID, accusedID, playedCards, bluff, middleCards);
+
+                        this.handleGatherMiddle(accuserID, accusedID, playedCards, bluff, middleCards);
                     }
 
                     case SetWinnerBroadcast setWinnerBroadcast -> {
@@ -316,7 +329,7 @@ public final class GameClient implements AutoCloseable {
                 if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.setAllPassed();
             }
 
-            private void handleCallBullshit(int accuserID, int accusedID, List<Card> playedCards, boolean bluff) {
+            private void handleCallBullshit(int accuserID, int accusedID, List<Card> playedCards, boolean bluff, int numberOfMiddleCards, List<Card> middleCards) {
                 Player accuser = this.getPlayer(accuserID);
 
                 if (accuser == null) return;
@@ -333,7 +346,13 @@ public final class GameClient implements AutoCloseable {
                 GameClient.this.lastPlayer = null;
                 GameClient.this.lastPlayedCardNumber = 0;
 
-                if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.calledBullshit(accuser, accused, playedCards, bluff);
+                if (GameClient.this.gameEventListener != null) GameClient.this.gameEventListener.calledBullshit(accuser, accused, playedCards, bluff, numberOfMiddleCards, middleCards);
+            }
+
+            private void handleGatherMiddle(int accuserID, int accusedID, List<Card> playedCards, boolean bluff, List<Card> middleCards) {
+                GameClient.this.thisCards.addAll(middleCards);
+
+                this.handleCallBullshit(accuserID, accusedID, playedCards, bluff, middleCards.size(), middleCards);
             }
 
             private void handleSetWinner(int playerID) {

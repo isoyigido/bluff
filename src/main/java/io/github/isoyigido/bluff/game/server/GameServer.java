@@ -73,6 +73,7 @@ public final class GameServer implements AutoCloseable {
         kryo.register(StartGameRequest.class);
         kryo.register(PlayCardsRequest.class);
         kryo.register(CallBullshitRequest.class);
+        kryo.register(GatherMiddleBroadcast.class);
         kryo.register(PassRequest.class);
         kryo.register(ChangeRankRequest.class);
         kryo.register(PlayerJoinedBroadcast.class);
@@ -514,9 +515,11 @@ public final class GameServer implements AutoCloseable {
 
                 wrongPlayer.cards.addAll(GameServer.this.cardsInTheMiddle);
 
-                GameServer.this.cardsInTheMiddle.clear();
+                GameServer.this.server.sendToAllExceptTCP(wrongPlayer.connectionID, new CallBullshitBroadcast(player.connectionID, accusedPlayerID, GameServer.this.lastPlayedCards, GameServer.this.lastWasBluff, GameServer.this.cardsInTheMiddle.size()));
 
-                GameServer.this.server.sendToAllTCP(new CallBullshitBroadcast(player.connectionID, accusedPlayerID, GameServer.this.lastPlayedCards, GameServer.this.lastWasBluff));
+                GameServer.this.server.sendToTCP(wrongPlayer.connectionID, new GatherMiddleBroadcast(player.connectionID, accusedPlayerID, GameServer.this.lastPlayedCards, GameServer.this.lastWasBluff, GameServer.this.cardsInTheMiddle));
+
+                GameServer.this.cardsInTheMiddle.clear();
 
                 GameServer.this.lastPlayer = null;
                 GameServer.this.lastPlayedCards = null;
@@ -525,8 +528,6 @@ public final class GameServer implements AutoCloseable {
                 this.setAllPassedStatus(true);
 
                 this.setTurn(rightPlayer);
-
-                GameServer.this.server.sendToTCP(wrongPlayer.connectionID, new SetCardsBroadcast(wrongPlayer.cards));
             }
 
             private void handlePassRequest(Player player) {

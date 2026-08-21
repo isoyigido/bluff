@@ -11,6 +11,7 @@ import io.github.isoyigido.bluff.game.cards.Card;
 import io.github.isoyigido.bluff.game.cards.Rank;
 import io.github.isoyigido.bluff.game.client.GameClient;
 import io.github.isoyigido.bluff.game.client.GameEventListener;
+import io.github.isoyigido.bluff.gui.animation.CallBullshitAnimation;
 import io.github.isoyigido.bluff.gui.animation.DealCardsAnimation;
 import io.github.isoyigido.bluff.gui.animation.PlayCardsAnimation;
 import io.github.isoyigido.bluff.gui.components.game.ActionPanel;
@@ -39,11 +40,15 @@ public class GameGUI extends GUI {
         super.addWidget(playerCardsOverlay.center());
         super.addWidget(middleCardsComponent.center());
 
-        super.addWidget(new DealCardsAnimation(middleCardsComponent, playerCardsOverlay, 3).top(0, 0));
+        super.addWidget(new DealCardsAnimation(middleCardsComponent, playerCardsOverlay, 3.0f).top(0, 0));
 
-        PlayCardsAnimation playCardsAnimation = new PlayCardsAnimation(gameClient, middleCardsComponent, playerCardsOverlay, 2);
+        PlayCardsAnimation playCardsAnimation = new PlayCardsAnimation(gameClient, middleCardsComponent, playerCardsOverlay, 2.0f);
 
-        super.addWidget(playCardsAnimation.top(0, 0));
+        super.addWidget(playCardsAnimation.topLeft(0, 0));
+
+        CallBullshitAnimation callBullshitAnimation = new CallBullshitAnimation(gameClient, middleCardsComponent, playerCardsOverlay, 1.0f, 1.0f, 2.0f);
+
+        super.addWidget(callBullshitAnimation.topLeft(0, 0));
 
         super.addWidget(playerNamesOverlay.center());
 
@@ -100,12 +105,11 @@ public class GameGUI extends GUI {
             }
 
             @Override
-            public void calledBullshit(GameClient.Player accuser, GameClient.Player accused, List<Card> cards, boolean bluff) {
+            public void calledBullshit(GameClient.Player accuser, GameClient.Player accused, List<Card> playedCards, boolean bluff, int numberOfMiddleCards, List<Card> middleCards) {
                 playerCardsOverlay.updatePlayerCards();
-                middleCardsComponent.updateCards();
                 actionPanel.updateElements();
 
-                middleCardsComponent.callBullshit(accuser, accused, cards, bluff);
+                callBullshitAnimation.callBullshit(accuser, accused, playedCards, bluff, numberOfMiddleCards, middleCards);
             }
 
             @Override
