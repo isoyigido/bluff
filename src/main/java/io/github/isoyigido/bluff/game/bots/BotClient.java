@@ -4,6 +4,8 @@ import io.github.isoyigido.bluff.game.cards.Card;
 import io.github.isoyigido.bluff.game.cards.Rank;
 import io.github.isoyigido.bluff.game.client.GameClient;
 import io.github.isoyigido.bluff.game.client.GameEventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Random;
@@ -13,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.random.RandomGenerator;
 
 public final class BotClient {
+    private static final Logger logger = LoggerFactory.getLogger(BotClient.class);
+
     private static final String[] BOT_NAMES = new String[] {
             "John", "Mike", "Dave", "Chris", "James", "Tom", "Dan", "Rob", "Alex", "Joe",
             "Mark", "Paul", "Ryan", "Kevin", "Luke", "Matt", "Will", "Sam", "Nick", "Ben",
@@ -43,6 +47,8 @@ public final class BotClient {
 
                 long delay = BotClient.random.nextInt(5000, 8000);
                 BotClient.scheduler.schedule(this::play, delay, TimeUnit.MILLISECONDS);
+
+                BotClient.logger.info("Bot client is now in turn. Scheduled a move. delay={}", delay);
             }
 
             @Override
@@ -57,9 +63,21 @@ public final class BotClient {
             }
 
             private void play() {
+                try {
+                    this.makeMove();
+                } catch (Throwable t) {
+                    BotClient.logger.error("Bot client encountered an error while making a move.", t);
+                }
+            }
+
+            private void makeMove() {
+                BotClient.logger.info("Bot client is now making a move.");
+
                 int lastPlayedCardNumber = gameClient.getLastPlayedCardNumber();
 
                 if (lastPlayedCardNumber > 4) {
+                    BotClient.logger.info("More than 4 cards of the same rank at once? Bullshit!");
+
                     gameClient.callBullshit();
 
                     return;
@@ -76,21 +94,31 @@ public final class BotClient {
                 if (this.numberOfMatchingCards == -1) this.numberOfMatchingCards = matchingCards.size();
 
                 if ((this.numberOfMatchingCards + lastPlayedCardNumber) > 4) {
+                    BotClient.logger.info("More than 4 cards of the same rank in total? Bullshit!");
+
                     gameClient.callBullshit();
 
                     return;
                 }
 
                 if ((lastPlayedCardNumber > 0) && (BotClient.random.nextInt(0, 4) == 0)) {
+                    BotClient.logger.info("Seems suspicious. Bullshit!");
+
                     gameClient.callBullshit();
 
                     return;
                 }
 
                 if (!matchingCards.isEmpty()) {
-                    if (BotClient.random.nextBoolean()) gameClient.playCards(matchingCards);
+                    if (BotClient.random.nextBoolean()) {
+                        BotClient.logger.info("I will play my cards genuinely.");
+
+                        gameClient.playCards(matchingCards);
+                    }
 
                     else {
+                        BotClient.logger.info("I will bluff.");
+
                         List<Card> notMatchingCards = cards.stream().filter(card -> card.rank() != currentRank).toList();
 
                         gameClient.playCards(notMatchingCards.subList(0, Math.min(notMatchingCards.size(), matchingCards.size())));
@@ -100,6 +128,8 @@ public final class BotClient {
                 }
 
                 if (!gameClient.didAllPass()) {
+                    BotClient.logger.info("I do not have any cards of the current rank. I will pass.");
+
                     gameClient.pass();
 
                     return;
@@ -111,9 +141,15 @@ public final class BotClient {
 
                 matchingCards = cards.stream().filter(card -> card.rank() == firstCardRank).toList();
 
-                if (BotClient.random.nextBoolean()) gameClient.changeRank(firstCardRank, matchingCards);
+                if (BotClient.random.nextBoolean()) {
+                    BotClient.logger.info("I will change the rank genuinely.");
+
+                    gameClient.changeRank(firstCardRank, matchingCards);
+                }
 
                 else {
+                    BotClient.logger.info("I will change the rank with a bluff.");
+
                     List<Card> notMatchingCards = cards.stream().filter(card -> card.rank() != firstCardRank).toList();
 
                     gameClient.changeRank(firstCardRank, notMatchingCards.subList(0, Math.min(notMatchingCards.size(), matchingCards.size())));
